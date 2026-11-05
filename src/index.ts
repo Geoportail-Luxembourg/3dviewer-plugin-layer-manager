@@ -1,8 +1,8 @@
 import type { VcsPlugin, VcsUiApp, PluginConfigEditor } from '@vcmap/ui';
 import { name, version, mapVersion } from '../package.json';
 
-type PluginConfig = Record<never, never>;
-type PluginState = Record<never, never>;
+type PluginConfig = object;
+type PluginState = object;
 
 type MyPlugin = VcsPlugin<PluginConfig, PluginState>;
 
