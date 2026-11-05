@@ -57,7 +57,7 @@
     animation: 150,
     handle: `.drag-handle-${props.level}`,
     forceFallback: true,
-    fallbackOnBody: true,
+    fallbackOnBody: false,
     ghostClass: 'sortable-ghost',
     chosenClass: 'sortable-chosen',
     dragClass: 'sortable-drag',
