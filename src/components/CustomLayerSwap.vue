@@ -15,7 +15,7 @@
   <div class="layer-tree">
     <CustomVcsTreeview
       v-if="items && items.length"
-      :items="items.reverse()"
+      :items="items"
       :show-searchbar="false"
       :draggable="true"
       open-all
