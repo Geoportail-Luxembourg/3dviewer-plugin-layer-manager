@@ -9,18 +9,6 @@ export const goToOptions = {
 };
 
 export function main(app: VcsUiApp): void {
-  for (let i = 0; i < app.layers.size; i++) {
-    console.log(app.layers.get(i));
-  }
-
-  app.layers.moved.addEventListener((layer) => {
-    console.log('layer moved', layer);
-  });
-
-  app.layers.stateChanged.addEventListener((layer) => {
-    console.log('layer state changed', layer);
-  });
-
   const { action } = createToggleAction(
     {
       name: goToOptions.name,
