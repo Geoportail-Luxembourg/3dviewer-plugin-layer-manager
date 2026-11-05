@@ -12,7 +12,7 @@
 
   const app = inject<VcsUiApp>('vcsApp')!;
   const { items, refreshItems } = useLayerTreeItems();
-  const { dropTargetZones, move } = useLayerSwapDrag(items, refreshItems);
+  const { move } = useLayerSwapDrag(refreshItems);
 
   function toggleOptions(item: VcsTreeNodeItem): void {
     if (!app.layers.getByKey(item.name)) {
@@ -31,7 +31,6 @@
       :show-searchbar="false"
       :draggable="true"
       open-all
-      :drop-target-zones="dropTargetZones"
       @item-moved="move"
       @click="toggleOptions"
     >

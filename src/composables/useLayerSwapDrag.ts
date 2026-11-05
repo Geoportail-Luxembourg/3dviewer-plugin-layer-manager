@@ -1,23 +1,13 @@
 import { inject } from 'vue';
-import type { ShallowRef } from 'vue';
 import { vcsLayerName, WMSLayer } from '@vcmap/core';
 import type { IndexedCollection } from '@vcmap/core';
 import { getLogger } from '@vcsuite/logger';
 import { moveDraggableItems } from '@vcmap/ui';
-import type {
-  DropZones,
-  ItemMovedEvent,
-  VcsDraggableItem,
-  VcsUiApp,
-} from '@vcmap/ui';
+import type { ItemMovedEvent, VcsDraggableItem, VcsUiApp } from '@vcmap/ui';
 import { wmsLayerName } from './useLayerTreeItems';
 import type { LayerTreeItem } from './useLayerTreeItems';
 
 export interface UseLayerSwapDrag {
-  dropTargetZones: (
-    item: VcsDraggableItem,
-    targetItem: VcsDraggableItem,
-  ) => DropZones;
   move: (event: ItemMovedEvent) => void;
 }
 
@@ -47,33 +37,8 @@ function moveItem<T>(
   collection.moveTo(item, targetIndex + offset);
 }
 
-export function useLayerSwapDrag(
-  items: ShallowRef<LayerTreeItem[]>,
-  refreshItems: () => void,
-): UseLayerSwapDrag {
+export function useLayerSwapDrag(refreshItems: () => void): UseLayerSwapDrag {
   const app = inject<VcsUiApp>('vcsApp')!;
-
-  function dropTargetZones(
-    item: VcsDraggableItem,
-    targetItem: VcsDraggableItem,
-  ): DropZones {
-    const layerItem = item as LayerTreeItem;
-    const layerTargetItem = targetItem as LayerTreeItem;
-    const isTopLevelItem = items.value.some((i) => i.name === layerItem.name);
-    const isTopLevelTarget = items.value.some(
-      (i) => i.name === layerTargetItem.name,
-    );
-    if (
-      isTopLevelItem !== isTopLevelTarget ||
-      (!isTopLevelItem &&
-        !isTopLevelTarget &&
-        layerItem[vcsLayerName] !== layerTargetItem[vcsLayerName])
-    ) {
-      return false;
-    }
-
-    return { before: true, after: true, into: false };
-  }
 
   function move(event: ItemMovedEvent): void {
     const item = event.item as LayerTreeItem;
@@ -104,5 +69,5 @@ export function useLayerSwapDrag(
     refreshItems();
   }
 
-  return { dropTargetZones, move };
+  return { move };
 }

@@ -1,6 +1,5 @@
 <script setup lang="ts">
   import { computed, getCurrentInstance, ref, useSlots, watch } from 'vue';
-  import type { ComponentPublicInstance } from 'vue';
   import { VBtn, VExpandTransition, VIcon, VRow } from 'vuetify/components';
   import {
     getForwardSlots,
@@ -8,8 +7,10 @@
     VcsActionButtonList,
     VcsTreeviewTitle,
   } from '@vcmap/ui';
-  import type { DropZones, VcsTreeNodeItem } from '@vcmap/ui';
+  import type { ItemMovedEvent, VcsTreeNodeItem } from '@vcmap/ui';
+  import CustomSortableList from './CustomSortableList.vue';
   import ImageElementInjector from './ImageElementInjector.vue';
+  import type { TreeItemMove } from '../composables/treeSortable';
 
   defineOptions({ name: 'VcsTreeNode' });
 
@@ -42,17 +43,7 @@
   const emit = defineEmits<{
     itemToggled: [name: string];
     click: [item: VcsTreeNodeItem, event: MouseEvent];
-    dragstart: [event: DragEvent, item: VcsTreeNodeItem];
-    dragover: [
-      event: DragEvent,
-      item: VcsTreeNodeItem,
-      dropTarget: HTMLElement,
-      dropTargetZones?: DropZones,
-      dropTargetOpen?: boolean,
-    ];
-    dragend: [event: DragEvent];
-    drop: [event: DragEvent, item: VcsTreeNodeItem];
-    dragleave: [event: DragEvent];
+    itemMoved: [event: ItemMovedEvent];
   }>();
 
   const instance = getCurrentInstance();
@@ -61,7 +52,6 @@
   const iconSize = computed(() => fontSize.value * (1.2 + 0.1 / 3));
   const slots = useSlots();
   const forwardSlots = getForwardSlots(slots);
-  const treenodeRef = ref<ComponentPublicInstance | null>(null);
   const searchOpenOverride = ref<boolean | undefined>(undefined);
 
   const children = computed(
@@ -159,27 +149,6 @@
     }
   }
 
-  function handleDragOver(event: DragEvent): void {
-    const dropTarget = treenodeRef.value?.$el as HTMLElement | undefined;
-    if (dropTarget) {
-      emit('dragover', event, props.item, dropTarget, true, isOpen.value);
-    }
-  }
-
-  function handleBottomDragOver(event: DragEvent): void {
-    const dropTarget = treenodeRef.value?.$el as HTMLElement | undefined;
-    if (dropTarget) {
-      emit(
-        'dragover',
-        event,
-        props.item,
-        dropTarget,
-        { before: false, into: false, after: true },
-        false,
-      );
-    }
-  }
-
   function bubbleItemToggled(name: string): void {
     emit('itemToggled', name);
   }
@@ -188,30 +157,23 @@
     emit('click', item, event);
   }
 
-  function bubbleDragStart(event: DragEvent, item: VcsTreeNodeItem): void {
-    emit('dragstart', event, item);
+  function bubbleItemMoved(event: ItemMovedEvent): void {
+    emit('itemMoved', event);
   }
 
-  function bubbleDragOver(
-    event: DragEvent,
-    item: VcsTreeNodeItem,
-    dropTarget: HTMLElement,
-    dropTargetZones?: DropZones,
-    dropTargetOpen?: boolean,
-  ): void {
-    emit('dragover', event, item, dropTarget, dropTargetZones, dropTargetOpen);
-  }
+  function handleChildItemMoved(move: TreeItemMove): void {
+    const item = children.value.find((i) => i.name === move.itemName);
+    const targetItem = children.value.find((i) => i.name === move.targetName);
+    if (!item || !targetItem) {
+      return;
+    }
 
-  function bubbleDragEnd(event: DragEvent): void {
-    emit('dragend', event);
-  }
-
-  function bubbleDrop(event: DragEvent, item: VcsTreeNodeItem): void {
-    emit('drop', event, item);
-  }
-
-  function bubbleDragLeave(event: DragEvent): void {
-    emit('dragleave', event);
+    emit('itemMoved', {
+      item,
+      targetItem,
+      targetIndex: 0,
+      position: move.position,
+    });
   }
 </script>
 
@@ -219,28 +181,22 @@
   <div
     v-if="matchFilter"
     class="vcs-tree-node"
+    :class="level > 0 ? `sortable-level-${level}` : undefined"
     :data-tree-item-name="item.name"
-    @dragover="handleDragOver"
-    @dragend="emit('dragend', $event)"
-    @drop="emit('drop', $event, item)"
-    @dragleave="emit('dragleave', $event)"
   >
     <v-row
-      ref="treenodeRef"
       no-gutters
       class="treenode flex-nowrap text-truncate"
       :class="`level-${level} ${isGroup ? 'group' : 'item'}`"
     >
       <VBtn
         v-if="draggable"
-        class="drag-handle mx-1"
+        :class="`drag-handle drag-handle-${level} mx-1`"
         icon="mdi-menu"
         :title="
           $t('lux3dviewerPluginLayerManager.components.layerSwap.dragHandle')
         "
         variant="text"
-        draggable="true"
-        @dragstart.stop="emit('dragstart', $event, item)"
         @click.stop
       />
       <VBtn
@@ -288,49 +244,36 @@
     </v-row>
     <slot name="options" v-bind="{ item }" />
     <v-expand-transition>
-      <div v-if="isOpen && children.length">
-        <div class="children">
-          <CustomVcsTreeNode
-            v-for="child in children"
-            :key="child.name"
-            :item="child"
-            :search="search"
-            :custom-filter="customFilter"
-            :show-all-children="
-              showAllChildren || (isGroup && matchesSelf && !hasDescendantMatch)
-            "
-            :level="level + 1"
-            :open-on-click="openOnClick"
-            :item-children="itemChildren"
-            :opened="opened"
-            :draggable="draggable"
-            @item-toggled="bubbleItemToggled"
-            @click="bubbleItemClicked"
-            @dragstart="bubbleDragStart"
-            @dragover="bubbleDragOver"
-            @dragend="bubbleDragEnd"
-            @drop="bubbleDrop"
-            @dragleave="bubbleDragLeave"
-          >
-            <template v-for="slot of forwardSlots" #[slot]="scope">
-              <slot :name="slot" v-bind="scope ?? {}" />
-            </template>
-          </CustomVcsTreeNode>
-        </div>
-        <div
-          v-if="draggable"
-          class="vcs-tree-node"
-          @dragover="handleBottomDragOver"
-          @dragend="emit('dragend', $event)"
-          @drop="emit('drop', $event, item)"
-          @dragleave="emit('dragleave', $event)"
+      <CustomSortableList
+        v-if="isOpen && children.length"
+        class="children"
+        :level="level + 1"
+        :disabled="!draggable"
+        @item-moved="handleChildItemMoved"
+      >
+        <CustomVcsTreeNode
+          v-for="child in children"
+          :key="child.name"
+          :item="child"
+          :search="search"
+          :custom-filter="customFilter"
+          :show-all-children="
+            showAllChildren || (isGroup && matchesSelf && !hasDescendantMatch)
+          "
+          :level="level + 1"
+          :open-on-click="openOnClick"
+          :item-children="itemChildren"
+          :opened="opened"
+          :draggable="draggable"
+          @item-toggled="bubbleItemToggled"
+          @click="bubbleItemClicked"
+          @item-moved="bubbleItemMoved"
         >
-          <v-row
-            no-gutters
-            class="treenode-bottom-drop flex-nowrap text-truncate"
-          ></v-row>
-        </div>
-      </div>
+          <template v-for="slot of forwardSlots" #[slot]="scope">
+            <slot :name="slot" v-bind="scope ?? {}" />
+          </template>
+        </CustomVcsTreeNode>
+      </CustomSortableList>
     </v-expand-transition>
   </div>
 </template>
@@ -391,40 +334,9 @@
     cursor: grab;
   }
 
-  .treenode-bottom-drop {
-    height: 5px;
-  }
-
-  .treenode,
-  .treenode-bottom-drop {
+  .treenode {
     box-sizing: border-box;
     border-top: 2px solid transparent;
     border-bottom: 2px solid transparent;
-  }
-
-  .drop-target-before > .treenode-bottom-drop,
-  .drop-target-before > .treenode {
-    border-top: 2px solid rgb(var(--v-theme-primary-lighten-1));
-  }
-  .drop-target-after > .treenode-bottom-drop,
-  .drop-target-after > .treenode {
-    border-bottom: 2px solid rgb(var(--v-theme-primary-darken-1));
-  }
-
-  .drop-target-into {
-    position: relative;
-
-    &::after {
-      content: '';
-      position: absolute;
-      top: 2px;
-      left: 2px;
-      right: 2px;
-      bottom: 2px;
-      outline: 2px dashed rgb(var(--v-theme-primary));
-      background: rgba(var(--v-theme-primary), 0.1);
-      pointer-events: none;
-      z-index: 1;
-    }
   }
 </style>
