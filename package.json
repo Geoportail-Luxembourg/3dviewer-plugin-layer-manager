@@ -53,6 +53,7 @@
     "vuetify": "~3.7.14"
   },
   "devDependencies": {
+    "@types/sortablejs": "^1.15.9",
     "@vcmap/plugin-cli": "^4.2.0",
     "@vcsuite/eslint-config": "^4.1.0",
     "@vitest/coverage-v8": "^5.1.0",
@@ -63,5 +64,10 @@
     "vitest": "^5.1.0",
     "vue-tsc": "^3.3.14"
   },
-  "mapVersion": "^6.3"
+  "mapVersion": "^6.3",
+  "dependencies": {
+    "@vueuse/core": "^11.3.0",
+    "@vueuse/integrations": "^11.3.0",
+    "sortablejs": "^1.15.7"
+  }
 }
