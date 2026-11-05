@@ -25,6 +25,8 @@ export default function plugin(): LayerManagerPlugin {
             layerSwap: {
               hideButton: 'Hide layer',
               showButton: 'Show layer',
+              opacity: 'Opacity',
+              dragHandle: 'Drag to reorder',
             },
           },
         },
@@ -35,6 +37,8 @@ export default function plugin(): LayerManagerPlugin {
             layerSwap: {
               hideButton: 'Ebene ausblenden',
               showButton: 'Ebene einblenden',
+              opacity: 'Deckkraft',
+              dragHandle: 'Zum Verschieben ziehen',
             },
           },
         },

@@ -220,8 +220,6 @@
     v-if="matchFilter"
     class="vcs-tree-node"
     :data-tree-item-name="item.name"
-    :draggable="draggable"
-    @dragstart="emit('dragstart', $event, item)"
     @dragover="handleDragOver"
     @dragend="emit('dragend', $event)"
     @drop="emit('drop', $event, item)"
@@ -233,6 +231,18 @@
       class="treenode flex-nowrap text-truncate"
       :class="`level-${level} ${isGroup ? 'group' : 'item'}`"
     >
+      <VBtn
+        v-if="draggable"
+        class="drag-handle mx-1"
+        icon="mdi-menu"
+        :title="
+          $t('lux3dviewerPluginLayerManager.components.layerSwap.dragHandle')
+        "
+        variant="text"
+        draggable="true"
+        @dragstart.stop="emit('dragstart', $event, item)"
+        @click.stop
+      />
       <VBtn
         v-if="isGroup"
         class="chevron-btn"
@@ -276,6 +286,7 @@
         />
       </slot>
     </v-row>
+    <slot name="options" v-bind="{ item }" />
     <v-expand-transition>
       <div v-if="isOpen && children.length">
         <div class="children">
@@ -309,7 +320,6 @@
         <div
           v-if="draggable"
           class="vcs-tree-node"
-          @dragstart="emit('dragstart', $event, item)"
           @dragover="handleBottomDragOver"
           @dragend="emit('dragend', $event)"
           @drop="emit('drop', $event, item)"
@@ -371,6 +381,10 @@
   // remove hover shadow over button
   :deep(.v-btn__overlay) {
     --v-hover-opacity: 0;
+  }
+
+  .drag-handle {
+    cursor: grab;
   }
 
   .treenode-bottom-drop {
