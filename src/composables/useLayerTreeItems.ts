@@ -2,13 +2,15 @@ import { inject, onUnmounted, shallowRef } from 'vue';
 import type { ShallowRef } from 'vue';
 import {
   moduleIdSymbol,
+  OpenStreetMapLayer,
+  RasterLayer,
   vcsLayerName,
   volatileModuleId,
   WMSLayer,
 } from '@vcmap/core';
 import type { Layer } from '@vcmap/core';
 import { WMSGroupContentTreeItem } from '@vcmap/ui';
-import type { VcsTreeNodeItem, VcsUiApp } from '@vcmap/ui';
+import type { VcsAction, VcsTreeNodeItem, VcsUiApp } from '@vcmap/ui';
 
 export const wmsLayerName = Symbol('wmsLayerName');
 
@@ -65,30 +67,71 @@ function layerFilter(app: VcsUiApp, l: Layer): boolean {
   );
 }
 
+type OpacityLayer = Layer & { opacity: number };
+
+function isOpacityLayer(layer: Layer): layer is OpacityLayer {
+  return layer instanceof RasterLayer || layer instanceof OpenStreetMapLayer;
+}
+
+function createOpacityAction(
+  layer: OpacityLayer,
+  previousOpacity: Map<string, number>,
+  refreshItems: () => void,
+): VcsAction {
+  const isHidden = layer.opacity === 0;
+
+  return {
+    name: 'layer-swap.opacity',
+    icon: isHidden ? 'mdi-eye-off' : 'mdi-eye',
+    title: isHidden
+      ? 'lux3dviewerPluginLayerManager.components.layerSwap.showButton'
+      : 'lux3dviewerPluginLayerManager.components.layerSwap.hideButton',
+    callback: (): void => {
+      if (layer.opacity > 0) {
+        previousOpacity.set(layer.name, layer.opacity);
+        layer.opacity = 0;
+      } else {
+        layer.opacity = previousOpacity.get(layer.name) ?? 1;
+        previousOpacity.delete(layer.name);
+      }
+
+      refreshItems();
+    },
+  };
+}
+
 // Collections and WMS LAYERS lists are ordered bottom-to-top. The tree
 // displays them top-first, so every collection order is reversed for display.
 function getLayerTreeItems(
   app: VcsUiApp,
   wmsGroupItemsMap: Map<string, WMSGroupContentTreeItem>,
+  previousOpacity: Map<string, number>,
+  refreshItems: () => void,
 ): LayerTreeItem[] {
   return toDisplayOrder(
     [...app.layers]
       .filter((l) => layerFilter(app, l))
       .map((l) => {
+        const actions: VcsAction[] = [];
+
+        if (isOpacityLayer(l)) {
+          actions.push(createOpacityAction(l, previousOpacity, refreshItems));
+        }
+
+        actions.push({
+          name: 'layer-swap.delete',
+          icon: 'mdi-delete',
+          title: 'components.layerSwap.deleteButton',
+          callback: (): void => {
+            l.deactivate();
+          },
+        });
+
         const item: LayerTreeItem = {
           name: l.name,
           title: (l.properties?.title as string | undefined) || l.name,
           index: app.layers.indexOf(l),
-          actions: [
-            {
-              name: 'layer-swap.delete',
-              icon: 'mdi-delete',
-              title: 'components.layerSwap.deleteButton',
-              callback: (): void => {
-                l.deactivate();
-              },
-            },
-          ],
+          actions,
           blockOverflow: false,
         };
 
@@ -108,14 +151,20 @@ function getLayerTreeItems(
 export function useLayerTreeItems(): UseLayerTreeItems {
   const app = inject<VcsUiApp>('vcsApp')!;
   const wmsGroupItemsMap = getWmsGroupItemsMap(app);
+  const previousOpacity = new Map<string, number>();
 
-  const items = shallowRef<LayerTreeItem[]>(
-    getLayerTreeItems(app, wmsGroupItemsMap),
-  );
+  const items = shallowRef<LayerTreeItem[]>([]);
 
   function refreshItems(): void {
-    items.value = getLayerTreeItems(app, wmsGroupItemsMap);
+    items.value = getLayerTreeItems(
+      app,
+      wmsGroupItemsMap,
+      previousOpacity,
+      refreshItems,
+    );
   }
+
+  refreshItems();
 
   const listeners = [
     app.layers.stateChanged.addEventListener(refreshItems),
@@ -126,6 +175,7 @@ export function useLayerTreeItems(): UseLayerTreeItems {
     listeners.forEach((removeListener) => {
       removeListener();
     });
+    previousOpacity.clear();
   });
 
   return { items, refreshItems };

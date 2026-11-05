@@ -18,6 +18,28 @@ export default function plugin(): LayerManagerPlugin {
     get mapVersion(): string {
       return mapVersion;
     },
+    i18n: {
+      en: {
+        lux3dviewerPluginLayerManager: {
+          components: {
+            layerSwap: {
+              hideButton: 'Hide layer',
+              showButton: 'Show layer',
+            },
+          },
+        },
+      },
+      de: {
+        lux3dviewerPluginLayerManager: {
+          components: {
+            layerSwap: {
+              hideButton: 'Ebene ausblenden',
+              showButton: 'Ebene einblenden',
+            },
+          },
+        },
+      },
+    },
     initialize(vcsUiApp: VcsUiApp): void {
       main(vcsUiApp);
     },
