@@ -1,16 +1,13 @@
 <script setup lang="ts">
-  import { useSlots, watch } from 'vue';
+  import { computed, useSlots, watch } from 'vue';
   import { useDisplay } from 'vuetify';
   import { getLogger } from '@vcsuite/logger';
   import { getForwardSlots } from '@vcmap/ui';
-  import type {
-    DropTargetZonesFunction,
-    ItemMovedEvent,
-    VcsTreeNodeItem,
-  } from '@vcmap/ui';
+  import type { ItemMovedEvent, VcsTreeNodeItem } from '@vcmap/ui';
+  import CustomSortableList from './CustomSortableList.vue';
   import CustomVcsTreeNode from './CustomVcsTreeNode.vue';
   import CustomVcsTreeviewSearchbar from './CustomVcsTreeviewSearchbar.vue';
-  import { setupDraggableListOrTree } from '../composables/useTreeDrag';
+  import type { TreeItemMove } from '../composables/treeSortable';
 
   defineOptions({ name: 'VcsTreeview' });
 
@@ -28,7 +25,6 @@
         item: VcsTreeNodeItem,
         search: string | undefined,
       ) => boolean;
-      dropTargetZones?: DropTargetZonesFunction;
     }>(),
     {
       items: () => [],
@@ -40,7 +36,6 @@
       stickySearchbar: false,
       searchbarPlaceholder: undefined,
       customFilter: undefined,
-      dropTargetZones: undefined,
     },
   );
 
@@ -81,8 +76,28 @@
 
   const { xs } = useDisplay();
 
-  const { isDraggable, dragStart, dragOver, dragEnd, drop } =
-    setupDraggableListOrTree(props, localSearchValue, emit);
+  const isDraggable = computed(
+    () => !localSearchValue.value && props.draggable,
+  );
+
+  function handleRootItemMoved(move: TreeItemMove): void {
+    const item = props.items.find((i) => i.name === move.itemName);
+    const targetItem = props.items.find((i) => i.name === move.targetName);
+    if (!item || !targetItem) {
+      return;
+    }
+
+    emit('itemMoved', {
+      item,
+      targetItem,
+      targetIndex: 0,
+      position: move.position,
+    });
+  }
+
+  function handleNodeItemMoved(event: ItemMovedEvent): void {
+    emit('itemMoved', event);
+  }
 
   function itemClicked(
     item: VcsTreeNodeItem | undefined,
@@ -132,11 +147,16 @@
         <slot name="search-append" :has-filter="hasFilter" />
       </template>
     </CustomVcsTreeviewSearchbar>
-    <div class="treeview-items">
+    <CustomSortableList
+      class="treeview-items"
+      :level="0"
+      :disabled="!isDraggable"
+      @item-moved="handleRootItemMoved"
+    >
       <div
         v-for="(item, index) in items"
         :key="item.name"
-        class="vcs-treeitem"
+        class="vcs-treeitem sortable-level-0"
         :class="{ 'mobile-spacing': xs }"
       >
         <CustomVcsTreeNode
@@ -150,11 +170,8 @@
           :item-children="itemChildren"
           :draggable="isDraggable"
           @mousedown.shift="$event.preventDefault()"
-          @dragstart="dragStart"
-          @dragover="dragOver"
-          @dragend="dragEnd"
-          @drop="drop"
           @item-toggled="itemToggled"
+          @item-moved="handleNodeItemMoved"
           @click="handleItemClick"
         >
           <template v-for="slot of forwardSlots" #[slot]="scope">
@@ -162,7 +179,7 @@
           </template>
         </CustomVcsTreeNode>
       </div>
-    </div>
+    </CustomSortableList>
   </div>
 </template>
 
