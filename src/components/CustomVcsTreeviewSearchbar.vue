@@ -1,29 +1,3 @@
-<template>
-  <div
-    v-bind="noListenerAttrs"
-    class="pa-2 bg-base-lighten-3 position-relative d-flex flex-row justify-space-between align-center rounded-0 vcs-treeview-searchbar"
-  >
-    <slot name="prepend">
-      <v-icon class="search-icon my-0 ml-1" :size="iconSize - 4">
-        $vcsSearch
-      </v-icon>
-    </slot>
-
-    <slot v-bind="{ ...props, attrs }">
-      <VcsTextField
-        class="searchbar outlined rounded-xl align-center justify-center base-lighten-4 pa-1 pl-6"
-        :placeholder="$st(placeholder)"
-        clearable
-        v-bind="attrs"
-      />
-    </slot>
-
-    <slot name="append" :has-filter="hasFilter">
-      <v-icon v-if="hasFilter" class="ml-2" :size="iconSize">$vcsFilter</v-icon>
-    </slot>
-  </div>
-</template>
-
 <script setup lang="ts">
   import { computed, useAttrs } from 'vue';
   import { VIcon } from 'vuetify/components';
@@ -51,6 +25,32 @@
   const iconSize = computed(() => fontSize.value * (1.2 + 0.1 / 3));
   const noListenerAttrs = computed(() => removeListenersFromAttrs(attrs));
 </script>
+
+<template>
+  <div
+    v-bind="noListenerAttrs"
+    class="pa-2 bg-base-lighten-3 position-relative d-flex flex-row justify-space-between align-center rounded-0 vcs-treeview-searchbar"
+  >
+    <slot name="prepend">
+      <v-icon class="search-icon my-0 ml-1" :size="iconSize - 4">
+        $vcsSearch
+      </v-icon>
+    </slot>
+
+    <slot v-bind="{ ...props, attrs }">
+      <VcsTextField
+        class="searchbar outlined rounded-xl align-center justify-center base-lighten-4 pa-1 pl-6"
+        :placeholder="$st(placeholder)"
+        clearable
+        v-bind="attrs"
+      />
+    </slot>
+
+    <slot name="append" :has-filter="hasFilter">
+      <v-icon v-if="hasFilter" class="ml-2" :size="iconSize">$vcsFilter</v-icon>
+    </slot>
+  </div>
+</template>
 
 <style lang="scss" scoped>
   .search-icon {
