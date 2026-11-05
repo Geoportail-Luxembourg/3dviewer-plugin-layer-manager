@@ -336,6 +336,10 @@
 </template>
 
 <style lang="scss" scoped>
+  :deep(.title-parent.vcs-treeview-title) {
+    cursor: pointer;
+  }
+
   .treenode {
     align-items: center !important;
     min-height: calc(var(--v-vcs-font-size) * 2 + 6px);
