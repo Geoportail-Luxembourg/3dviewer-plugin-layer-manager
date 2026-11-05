@@ -142,9 +142,6 @@
         <CustomVcsTreeNode
           v-model:opened="localOpenedItems"
           class="root-node"
-          :class="{
-            'vcs-draggable-item': isDraggable,
-          }"
           :item="item"
           :path="[index]"
           :search="localSearchValue"
@@ -229,9 +226,5 @@
     > :deep(.group) {
       font-weight: 700 !important;
     }
-  }
-  .vcs-draggable-item:hover {
-    cursor: grab;
-    user-select: none;
   }
 </style>
