@@ -15,8 +15,8 @@ import type { LayerTreeItem } from './useLayerTreeItems';
 
 export interface UseLayerSwapDrag {
   dropTargetZones: (
-    item: LayerTreeItem,
-    targetItem: LayerTreeItem,
+    item: VcsDraggableItem,
+    targetItem: VcsDraggableItem,
   ) => DropZones;
   move: (event: ItemMovedEvent) => void;
 }
@@ -46,18 +46,20 @@ export function useLayerSwapDrag(
   const app = inject<VcsUiApp>('vcsApp')!;
 
   function dropTargetZones(
-    item: LayerTreeItem,
-    targetItem: LayerTreeItem,
+    item: VcsDraggableItem,
+    targetItem: VcsDraggableItem,
   ): DropZones {
-    const isTopLevelItem = items.value.some((i) => i.name === item.name);
+    const layerItem = item as LayerTreeItem;
+    const layerTargetItem = targetItem as LayerTreeItem;
+    const isTopLevelItem = items.value.some((i) => i.name === layerItem.name);
     const isTopLevelTarget = items.value.some(
-      (i) => i.name === targetItem.name,
+      (i) => i.name === layerTargetItem.name,
     );
     if (
       isTopLevelItem !== isTopLevelTarget ||
       (!isTopLevelItem &&
         !isTopLevelTarget &&
-        item[vcsLayerName] !== targetItem[vcsLayerName])
+        layerItem[vcsLayerName] !== layerTargetItem[vcsLayerName])
     ) {
       return false;
     }

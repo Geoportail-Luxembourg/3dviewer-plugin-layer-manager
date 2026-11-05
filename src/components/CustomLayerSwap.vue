@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import { VSheet } from 'vuetify/components';
-  import { VcsTreeview } from '@vcmap/ui';
+  import type { VcsTreeNodeItem } from '@vcmap/ui';
+  import CustomVcsTreeview from './CustomVcsTreeview.vue';
   import { useLayerTreeItems } from '../composables/useLayerTreeItems';
   import { useLayerSwapDrag } from '../composables/useLayerSwapDrag';
 
@@ -12,7 +13,7 @@
 
 <template>
   <div class="layer-tree">
-    <VcsTreeview
+    <CustomVcsTreeview
       v-if="items && items.length"
       :items="items.reverse()"
       :show-searchbar="false"
@@ -20,6 +21,7 @@
       open-all
       :drop-target-zones="dropTargetZones"
       @item-moved="move"
+      @click="(item: VcsTreeNodeItem) => console.log('here: ' + item)"
     />
     <v-sheet v-else class="ma-2">
       {{ $t('content.empty') }}
