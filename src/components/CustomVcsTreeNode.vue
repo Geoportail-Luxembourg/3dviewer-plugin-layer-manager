@@ -1,113 +1,3 @@
-<template>
-  <div
-    v-if="matchFilter"
-    class="vcs-tree-node"
-    :data-tree-item-name="item.name"
-    :draggable="draggable"
-    @dragstart="emit('dragstart', $event, item)"
-    @dragover="handleDragOver"
-    @dragend="emit('dragend', $event)"
-    @drop="emit('drop', $event, item)"
-    @dragleave="emit('dragleave', $event)"
-  >
-    <v-row
-      ref="treenodeRef"
-      no-gutters
-      class="treenode flex-nowrap text-truncate"
-      :class="`level-${level} ${isGroup ? 'group' : 'item'}`"
-    >
-      <VBtn
-        v-if="isGroup"
-        class="chevron-btn"
-        variant="text"
-        :disabled="children.length === 0"
-        :icon="isOpen ? 'mdi-chevron-down' : 'mdi-chevron-right'"
-        @click="toggleCurrentItem"
-      />
-      <slot name="prepend" v-bind="{ item }">
-        <span
-          class="prepend"
-          :class="{
-            'text-disabled': item.disabled,
-          }"
-        >
-          <div v-if="item.icon">
-            <v-icon v-if="typeof item?.icon === 'string'" :size="iconSize">
-              {{ item.icon }}
-            </v-icon>
-            <ImageElementInjector v-else :element="item.icon" />
-          </div>
-        </span>
-      </slot>
-      <slot name="title" v-bind="{ item }">
-        <VcsTreeviewTitle
-          :item="item"
-          :cursor-pointer="item.clickable || (openOnClick && isGroup)"
-          @click="handleTitleClick"
-        />
-      </slot>
-      <slot name="append" v-bind="{ item }">
-        <VcsActionButtonList
-          v-if="item.actions && item.actions.length > 0"
-          :actions="item.actions"
-          :overflow-count="3"
-          :disabled="item.disabled"
-          right
-          tooltip-position="right"
-          :block-overflow="item.blockOverflow ?? true"
-          class="col-4 pa-0 ml-auto pr-4"
-        />
-      </slot>
-    </v-row>
-    <v-expand-transition>
-      <div v-if="isOpen && children.length">
-        <div class="children">
-          <CustomVcsTreeNode
-            v-for="child in children"
-            :key="child.name"
-            :item="child"
-            :search="search"
-            :custom-filter="customFilter"
-            :show-all-children="
-              showAllChildren || (isGroup && matchesSelf && !hasDescendantMatch)
-            "
-            :level="level + 1"
-            :open-on-click="openOnClick"
-            :item-children="itemChildren"
-            :opened="opened"
-            :draggable="draggable"
-            @item-toggled="bubbleItemToggled"
-            @click="bubbleItemClicked"
-            @dragstart="bubbleDragStart"
-            @dragover="bubbleDragOver"
-            @dragend="bubbleDragEnd"
-            @drop="bubbleDrop"
-            @dragleave="bubbleDragLeave"
-          >
-            <template v-for="slot of forwardSlots" #[slot]="scope">
-              <slot :name="slot" v-bind="scope ?? {}" />
-            </template>
-          </CustomVcsTreeNode>
-        </div>
-        <div
-          v-if="draggable"
-          class="vcs-tree-node"
-          @dragstart="emit('dragstart', $event, item)"
-          @dragover="handleBottomDragOver"
-          @dragend="emit('dragend', $event)"
-          @drop="emit('drop', $event, item)"
-          @dragleave="emit('dragleave', $event)"
-        >
-          <v-row
-            no-gutters
-            class="treenode-bottom-drop flex-nowrap text-truncate"
-          ></v-row>
-        </div>
-      </div>
-    </v-expand-transition>
-  </div>
-</template>
-
 <script setup lang="ts">
   import { computed, getCurrentInstance, ref, useSlots, watch } from 'vue';
   import type { ComponentPublicInstance } from 'vue';
@@ -324,6 +214,116 @@
     emit('dragleave', event);
   }
 </script>
+
+<template>
+  <div
+    v-if="matchFilter"
+    class="vcs-tree-node"
+    :data-tree-item-name="item.name"
+    :draggable="draggable"
+    @dragstart="emit('dragstart', $event, item)"
+    @dragover="handleDragOver"
+    @dragend="emit('dragend', $event)"
+    @drop="emit('drop', $event, item)"
+    @dragleave="emit('dragleave', $event)"
+  >
+    <v-row
+      ref="treenodeRef"
+      no-gutters
+      class="treenode flex-nowrap text-truncate"
+      :class="`level-${level} ${isGroup ? 'group' : 'item'}`"
+    >
+      <VBtn
+        v-if="isGroup"
+        class="chevron-btn"
+        variant="text"
+        :disabled="children.length === 0"
+        :icon="isOpen ? 'mdi-chevron-down' : 'mdi-chevron-right'"
+        @click="toggleCurrentItem"
+      />
+      <slot name="prepend" v-bind="{ item }">
+        <span
+          class="prepend"
+          :class="{
+            'text-disabled': item.disabled,
+          }"
+        >
+          <div v-if="item.icon">
+            <v-icon v-if="typeof item?.icon === 'string'" :size="iconSize">
+              {{ item.icon }}
+            </v-icon>
+            <ImageElementInjector v-else :element="item.icon" />
+          </div>
+        </span>
+      </slot>
+      <slot name="title" v-bind="{ item }">
+        <VcsTreeviewTitle
+          :item="item"
+          :cursor-pointer="item.clickable || (openOnClick && isGroup)"
+          @click="handleTitleClick"
+        />
+      </slot>
+      <slot name="append" v-bind="{ item }">
+        <VcsActionButtonList
+          v-if="item.actions && item.actions.length > 0"
+          :actions="item.actions"
+          :overflow-count="3"
+          :disabled="item.disabled"
+          right
+          tooltip-position="right"
+          :block-overflow="item.blockOverflow ?? true"
+          class="col-4 pa-0 ml-auto pr-4"
+        />
+      </slot>
+    </v-row>
+    <v-expand-transition>
+      <div v-if="isOpen && children.length">
+        <div class="children">
+          <CustomVcsTreeNode
+            v-for="child in children"
+            :key="child.name"
+            :item="child"
+            :search="search"
+            :custom-filter="customFilter"
+            :show-all-children="
+              showAllChildren || (isGroup && matchesSelf && !hasDescendantMatch)
+            "
+            :level="level + 1"
+            :open-on-click="openOnClick"
+            :item-children="itemChildren"
+            :opened="opened"
+            :draggable="draggable"
+            @item-toggled="bubbleItemToggled"
+            @click="bubbleItemClicked"
+            @dragstart="bubbleDragStart"
+            @dragover="bubbleDragOver"
+            @dragend="bubbleDragEnd"
+            @drop="bubbleDrop"
+            @dragleave="bubbleDragLeave"
+          >
+            <template v-for="slot of forwardSlots" #[slot]="scope">
+              <slot :name="slot" v-bind="scope ?? {}" />
+            </template>
+          </CustomVcsTreeNode>
+        </div>
+        <div
+          v-if="draggable"
+          class="vcs-tree-node"
+          @dragstart="emit('dragstart', $event, item)"
+          @dragover="handleBottomDragOver"
+          @dragend="emit('dragend', $event)"
+          @drop="emit('drop', $event, item)"
+          @dragleave="emit('dragleave', $event)"
+        >
+          <v-row
+            no-gutters
+            class="treenode-bottom-drop flex-nowrap text-truncate"
+          ></v-row>
+        </div>
+      </div>
+    </v-expand-transition>
+  </div>
+</template>
 
 <style lang="scss" scoped>
   .treenode {

@@ -1,57 +1,3 @@
-<template>
-  <div
-    class="vcs-treeview"
-    :class="{ 'sticky-searchbar': stickySearchbar && showSearchbar }"
-  >
-    <CustomVcsTreeviewSearchbar
-      v-if="showSearchbar"
-      v-model="localSearchValue"
-      :placeholder="searchbarPlaceholder"
-    >
-      <template #prepend>
-        <slot name="search-prepend" />
-      </template>
-      <template #append="{ hasFilter }">
-        <slot name="search-append" :has-filter="hasFilter" />
-      </template>
-    </CustomVcsTreeviewSearchbar>
-    <div class="treeview-items">
-      <div
-        v-for="(item, index) in items"
-        :key="item.name"
-        class="vcs-treeitem"
-        :class="{ 'mobile-spacing': xs }"
-      >
-        <CustomVcsTreeNode
-          v-model:opened="localOpenedItems"
-          class="root-node"
-          :class="{
-            'vcs-draggable-item': isDraggable,
-          }"
-          :item="item"
-          :path="[index]"
-          :search="localSearchValue"
-          :custom-filter="customFilter"
-          :open-on-click="openOnClick"
-          :item-children="itemChildren"
-          :draggable="isDraggable"
-          @mousedown.shift="$event.preventDefault()"
-          @dragstart="dragStart"
-          @dragover="dragOver"
-          @dragend="dragEnd"
-          @drop="drop"
-          @item-toggled="itemToggled"
-          @click="handleItemClick"
-        >
-          <template v-for="slot of forwardSlots" #[slot]="scope">
-            <slot :name="slot" v-bind="scope ?? {}" />
-          </template>
-        </CustomVcsTreeNode>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
   import { useSlots, watch } from 'vue';
   import { useDisplay } from 'vuetify';
@@ -168,6 +114,60 @@
     emit('click', item);
   }
 </script>
+
+<template>
+  <div
+    class="vcs-treeview"
+    :class="{ 'sticky-searchbar': stickySearchbar && showSearchbar }"
+  >
+    <CustomVcsTreeviewSearchbar
+      v-if="showSearchbar"
+      v-model="localSearchValue"
+      :placeholder="searchbarPlaceholder"
+    >
+      <template #prepend>
+        <slot name="search-prepend" />
+      </template>
+      <template #append="{ hasFilter }">
+        <slot name="search-append" :has-filter="hasFilter" />
+      </template>
+    </CustomVcsTreeviewSearchbar>
+    <div class="treeview-items">
+      <div
+        v-for="(item, index) in items"
+        :key="item.name"
+        class="vcs-treeitem"
+        :class="{ 'mobile-spacing': xs }"
+      >
+        <CustomVcsTreeNode
+          v-model:opened="localOpenedItems"
+          class="root-node"
+          :class="{
+            'vcs-draggable-item': isDraggable,
+          }"
+          :item="item"
+          :path="[index]"
+          :search="localSearchValue"
+          :custom-filter="customFilter"
+          :open-on-click="openOnClick"
+          :item-children="itemChildren"
+          :draggable="isDraggable"
+          @mousedown.shift="$event.preventDefault()"
+          @dragstart="dragStart"
+          @dragover="dragOver"
+          @dragend="dragEnd"
+          @drop="drop"
+          @item-toggled="itemToggled"
+          @click="handleItemClick"
+        >
+          <template v-for="slot of forwardSlots" #[slot]="scope">
+            <slot :name="slot" v-bind="scope ?? {}" />
+          </template>
+        </CustomVcsTreeNode>
+      </div>
+    </div>
+  </div>
+</template>
 
 <style lang="scss" scoped>
   .vcs-treeview {
