@@ -4,12 +4,12 @@ import { name, version, mapVersion } from '../package.json';
 type PluginConfig = object;
 type PluginState = object;
 
-type MyPlugin = VcsPlugin<PluginConfig, PluginState>;
+type LayerManagerPlugin = VcsPlugin<PluginConfig, PluginState>;
 
 export default function plugin(
   config: PluginConfig,
   baseUrl: string,
-): MyPlugin {
+): LayerManagerPlugin {
   // eslint-disable-next-line no-console
   console.log(config, baseUrl);
   return {
