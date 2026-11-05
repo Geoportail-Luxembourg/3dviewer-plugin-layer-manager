@@ -87,7 +87,7 @@ export function setupDraggableListOrTree(
     } else if (
       isAfterAllowed &&
       relativeY >= (denominator - 1) * threshold &&
-      !isOpen
+      (!isOpen || !isIntoAllowed)
     ) {
       dropPosition = insertMode.AFTER;
       currentTarget.classList.add('drop-target-after');
@@ -96,18 +96,24 @@ export function setupDraggableListOrTree(
       currentTarget.classList.add('drop-target-into');
       dataTransfer.dropEffect = 'copy';
     } else {
+      dropPosition = null;
       dataTransfer.dropEffect = 'none';
     }
   }
 
   function drop(event: DragEvent, item: VcsDraggableItem): void {
     if (isDraggable.value) {
-      if (draggedItem && item && draggedItem !== item) {
+      if (
+        draggedItem &&
+        item &&
+        draggedItem !== item &&
+        dropPosition !== null
+      ) {
         emit('itemMoved', {
           item: draggedItem,
           targetItem: item,
           targetIndex: 0,
-          position: dropPosition ?? undefined,
+          position: dropPosition,
         });
       }
       draggedItem = null;

@@ -21,6 +21,14 @@ export interface UseLayerSwapDrag {
   move: (event: ItemMovedEvent) => void;
 }
 
+// Drag positions refer to the top-first tree, while the layer collection and
+// WMS LAYERS lists are bottom-to-top. BEFORE and AFTER must therefore flip.
+function toCollectionPosition(
+  position: ItemMovedEvent['position'],
+): ItemMovedEvent['position'] {
+  return position ? -position : position;
+}
+
 function moveItem<T>(
   collection: IndexedCollection<T>,
   event: ItemMovedEvent,
@@ -73,7 +81,10 @@ export function useLayerSwapDrag(
     const layer = app.layers.getByKey(item.name);
 
     if (layer && !targetItem[vcsLayerName]) {
-      moveItem(app.layers, event);
+      moveItem(app.layers, {
+        ...event,
+        position: toCollectionPosition(event.position),
+      });
     } else if (item[vcsLayerName] === targetItem[vcsLayerName]) {
       const wmsLayer = app.layers.getByKey(item[vcsLayerName]!);
       if (wmsLayer instanceof WMSLayer) {
@@ -82,7 +93,7 @@ export function useLayerSwapDrag(
           item: item[wmsLayerName] as unknown as VcsDraggableItem,
           targetItem: targetItem[wmsLayerName] as unknown as VcsDraggableItem,
           targetIndex: event.targetIndex,
-          position: event.position,
+          position: toCollectionPosition(event.position),
         });
         wmsLayer.setLayers(newLayerNames).catch((e: unknown) => {
           getLogger('LayerSwap.vue').error(String(e));

@@ -36,17 +36,23 @@ function getWmsGroupItemsMap(
   );
 }
 
+function toDisplayOrder<T>(items: T[]): T[] {
+  return [...items].reverse();
+}
+
 function getWmsChildren(
   layer: WMSLayer,
   contentTreeItem: WMSGroupContentTreeItem,
 ): LayerTreeItem[] {
-  return layer.getLayers().map((l, index) => ({
-    name: `${layer.name}.${l}`,
-    title: contentTreeItem.wmsEntries.find((e) => e.name === l)?.title || l,
-    index,
-    [wmsLayerName]: l,
-    [vcsLayerName]: layer.name,
-  }));
+  return toDisplayOrder(
+    layer.getLayers().map((l, index) => ({
+      name: `${layer.name}.${l}`,
+      title: contentTreeItem.wmsEntries.find((e) => e.name === l)?.title || l,
+      index,
+      [wmsLayerName]: l,
+      [vcsLayerName]: layer.name,
+    })),
+  );
 }
 
 function layerFilter(app: VcsUiApp, l: Layer): boolean {
@@ -59,40 +65,44 @@ function layerFilter(app: VcsUiApp, l: Layer): boolean {
   );
 }
 
+// Collections and WMS LAYERS lists are ordered bottom-to-top. The tree
+// displays them top-first, so every collection order is reversed for display.
 function getLayerTreeItems(
   app: VcsUiApp,
   wmsGroupItemsMap: Map<string, WMSGroupContentTreeItem>,
 ): LayerTreeItem[] {
-  return [...app.layers]
-    .filter((l) => layerFilter(app, l))
-    .map((l) => {
-      const item: LayerTreeItem = {
-        name: l.name,
-        title: (l.properties?.title as string | undefined) || l.name,
-        index: app.layers.indexOf(l),
-        actions: [
-          {
-            name: 'layer-swap.delete',
-            icon: 'mdi-delete',
-            title: 'components.layerSwap.deleteButton',
-            callback: (): void => {
-              l.deactivate();
+  return toDisplayOrder(
+    [...app.layers]
+      .filter((l) => layerFilter(app, l))
+      .map((l) => {
+        const item: LayerTreeItem = {
+          name: l.name,
+          title: (l.properties?.title as string | undefined) || l.name,
+          index: app.layers.indexOf(l),
+          actions: [
+            {
+              name: 'layer-swap.delete',
+              icon: 'mdi-delete',
+              title: 'components.layerSwap.deleteButton',
+              callback: (): void => {
+                l.deactivate();
+              },
             },
-          },
-        ],
-        blockOverflow: false,
-      };
-
-      const wmsGroupItem = wmsGroupItemsMap.get(l.name);
-      if (wmsGroupItem && l instanceof WMSLayer) {
-        return {
-          ...item,
-          children: getWmsChildren(l, wmsGroupItem),
+          ],
+          blockOverflow: false,
         };
-      }
 
-      return item;
-    });
+        const wmsGroupItem = wmsGroupItemsMap.get(l.name);
+        if (wmsGroupItem && l instanceof WMSLayer) {
+          return {
+            ...item,
+            children: getWmsChildren(l, wmsGroupItem),
+          };
+        }
+
+        return item;
+      }),
+  );
 }
 
 export function useLayerTreeItems(): UseLayerTreeItems {
