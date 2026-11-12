@@ -8,12 +8,14 @@ import {
 } from '@vcmap/core';
 import type { Layer } from '@vcmap/core';
 import { createLinkAction, WMSGroupContentTreeItem } from '@vcmap/ui';
-import type { VcsTreeNodeItem, VcsUiApp } from '@vcmap/ui';
+import type {
+  ContentTreeItemOptions,
+  VcsAction,
+  VcsTreeNodeItem,
+  VcsUiApp,
+} from '@vcmap/ui';
 
 export const wmsLayerName = Symbol('wmsLayerName');
-
-const metadataUrl =
-  'https://geocatalogue.geoportail.lu/geonetwork/srv/eng/catalog.search#/metadata/4c8abde8-f7dd-49d8-a977-43a1797f2822';
 
 export type LayerTreeItem = VcsTreeNodeItem & {
   index: number;
@@ -37,6 +39,22 @@ function getWmsGroupItemsMap(
       )
       .map((i) => [i.toJSON().layerName, i]),
   );
+}
+
+function getLayerInfoUrls(app: VcsUiApp): Map<string, string> {
+  const infoUrls = new Map<string, string>();
+
+  [...app.contentTree].forEach((item) => {
+    const config = item.toJSON() as ContentTreeItemOptions & {
+      layerName?: string;
+      infoUrl?: string;
+    };
+    if (config.layerName && config.infoUrl) {
+      infoUrls.set(config.layerName, config.infoUrl);
+    }
+  });
+
+  return infoUrls;
 }
 
 function toDisplayOrder<T>(items: T[]): T[] {
@@ -73,16 +91,16 @@ function layerFilter(app: VcsUiApp, l: Layer): boolean {
 function getLayerTreeItems(
   app: VcsUiApp,
   wmsGroupItemsMap: Map<string, WMSGroupContentTreeItem>,
+  layerInfoUrls: Map<string, string>,
 ): LayerTreeItem[] {
   return toDisplayOrder(
     [...app.layers]
       .filter((l) => layerFilter(app, l))
       .map((l) => {
-        const item: LayerTreeItem = {
-          name: l.name,
-          title: (l.properties?.title as string | undefined) || l.name,
-          index: app.layers.indexOf(l),
-          actions: [
+        const actions: VcsAction[] = [];
+        const infoUrl = layerInfoUrls.get(l.name);
+        if (infoUrl) {
+          actions.push(
             createLinkAction(
               {
                 name: 'layer-swap.info',
@@ -90,17 +108,25 @@ function getLayerTreeItems(
                 title:
                   'lux3dviewerPluginLayerManager.components.layerSwap.infoButton',
               },
-              metadataUrl,
+              infoUrl,
             ),
-            {
-              name: 'layer-swap.delete',
-              icon: 'mdi-delete',
-              title: 'components.layerSwap.deleteButton',
-              callback: (): void => {
-                l.deactivate();
-              },
-            },
-          ],
+          );
+        }
+
+        actions.push({
+          name: 'layer-swap.delete',
+          icon: 'mdi-delete',
+          title: 'components.layerSwap.deleteButton',
+          callback: (): void => {
+            l.deactivate();
+          },
+        });
+
+        const item: LayerTreeItem = {
+          name: l.name,
+          title: (l.properties?.title as string | undefined) || l.name,
+          index: app.layers.indexOf(l),
+          actions,
         };
 
         const wmsGroupItem = wmsGroupItemsMap.get(l.name);
@@ -123,7 +149,11 @@ export function useLayerTreeItems(): UseLayerTreeItems {
   const items = shallowRef<LayerTreeItem[]>([]);
 
   function refreshItems(): void {
-    items.value = getLayerTreeItems(app, wmsGroupItemsMap);
+    items.value = getLayerTreeItems(
+      app,
+      wmsGroupItemsMap,
+      getLayerInfoUrls(app),
+    );
   }
 
   refreshItems();
@@ -131,6 +161,8 @@ export function useLayerTreeItems(): UseLayerTreeItems {
   const listeners = [
     app.layers.stateChanged.addEventListener(refreshItems),
     app.maps.mapActivated.addEventListener(refreshItems),
+    app.contentTree.added.addEventListener(refreshItems),
+    app.contentTree.removed.addEventListener(refreshItems),
   ];
 
   onUnmounted(() => {
