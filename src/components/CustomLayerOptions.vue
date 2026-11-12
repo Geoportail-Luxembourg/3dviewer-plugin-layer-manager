@@ -1,5 +1,6 @@
 <script setup lang="ts">
   import { computed, inject, ref, watch } from 'vue';
+  import { TerrainLayer } from '@vcmap/core';
   import { VAlert, VBtn } from 'vuetify/components';
   import { VcsSlider } from '@vcmap/ui';
   import type { VcsTreeNodeItem, VcsUiApp } from '@vcmap/ui';
@@ -32,6 +33,11 @@
   });
   const shaderBlocked = computed(
     () => !!shaderLayer.value && hasExternalCustomShader(shaderLayer.value),
+  );
+  const unsupportedMessageKey = computed(() =>
+    layer.value instanceof TerrainLayer
+      ? 'lux3dviewerPluginLayerManager.components.layerSwap.opacityUnsupportedTerrain'
+      : 'lux3dviewerPluginLayerManager.components.layerSwap.opacityUnsupported',
   );
 
   const opacity = ref(0);
@@ -123,6 +129,9 @@
         />
       </div>
     </template>
+    <VAlert v-else type="info" variant="tonal" density="compact" class="w-100">
+      {{ $t(unsupportedMessageKey) }}
+    </VAlert>
   </div>
 </template>
 
