@@ -47,6 +47,7 @@
   },
   "prettier": "@vcsuite/eslint-config/prettier.js",
   "peerDependencies": {
+    "@vcmap-cesium/engine": "^11.0.5",
     "@vcmap/core": "^6.3.13",
     "@vcmap/ui": "^6.3.15",
     "vue": "~3.4.38",
