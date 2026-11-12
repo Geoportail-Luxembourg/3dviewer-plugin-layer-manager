@@ -1,5 +1,5 @@
 import { type VcsUiApp, ButtonLocation, createToggleAction } from '@vcmap/ui';
-import LayerSwap from './components/CustomLayerSwap.vue';
+import LayerSwap from './components/LayerSwap.vue';
 import config from '../config.json';
 
 export const goToOptions = {

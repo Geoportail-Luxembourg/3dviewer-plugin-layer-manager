@@ -4,9 +4,9 @@
   import { getLogger } from '@vcsuite/logger';
   import { getForwardSlots } from '@vcmap/ui';
   import type { ItemMovedEvent, VcsTreeNodeItem } from '@vcmap/ui';
-  import CustomSortableList from './CustomSortableList.vue';
-  import CustomVcsTreeNode from './CustomVcsTreeNode.vue';
-  import CustomVcsTreeviewSearchbar from './CustomVcsTreeviewSearchbar.vue';
+  import SortableList from './SortableList.vue';
+  import TreeNode from './TreeNode.vue';
+  import TreeviewSearchbar from './TreeviewSearchbar.vue';
   import type { TreeItemMove } from '../composables/treeSortable';
 
   defineOptions({ name: 'VcsTreeview' });
@@ -135,7 +135,7 @@
     class="vcs-treeview"
     :class="{ 'sticky-searchbar': stickySearchbar && showSearchbar }"
   >
-    <CustomVcsTreeviewSearchbar
+    <TreeviewSearchbar
       v-if="showSearchbar"
       v-model="localSearchValue"
       :placeholder="searchbarPlaceholder"
@@ -146,8 +146,8 @@
       <template #append="{ hasFilter }">
         <slot name="search-append" :has-filter="hasFilter" />
       </template>
-    </CustomVcsTreeviewSearchbar>
-    <CustomSortableList
+    </TreeviewSearchbar>
+    <SortableList
       class="treeview-items"
       :level="0"
       :disabled="!isDraggable"
@@ -159,7 +159,7 @@
         class="vcs-treeitem sortable-level-0"
         :class="{ 'mobile-spacing': xs }"
       >
-        <CustomVcsTreeNode
+        <TreeNode
           v-model:opened="localOpenedItems"
           class="root-node"
           :item="item"
@@ -177,9 +177,9 @@
           <template v-for="slot of forwardSlots" #[slot]="scope">
             <slot :name="slot" v-bind="scope ?? {}" />
           </template>
-        </CustomVcsTreeNode>
+        </TreeNode>
       </div>
-    </CustomSortableList>
+    </SortableList>
   </div>
 </template>
 

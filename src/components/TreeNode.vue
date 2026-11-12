@@ -8,7 +8,7 @@
     VcsTreeviewTitle,
   } from '@vcmap/ui';
   import type { ItemMovedEvent, VcsTreeNodeItem } from '@vcmap/ui';
-  import CustomSortableList from './CustomSortableList.vue';
+  import SortableList from './SortableList.vue';
   import ImageElementInjector from './ImageElementInjector.vue';
   import type { TreeItemMove } from '../composables/treeSortable';
 
@@ -243,14 +243,14 @@
     </v-row>
     <slot name="options" v-bind="{ item }" />
     <v-expand-transition>
-      <CustomSortableList
+      <SortableList
         v-if="isOpen && children.length"
         class="children"
         :level="level + 1"
         :disabled="!draggable"
         @item-moved="handleChildItemMoved"
       >
-        <CustomVcsTreeNode
+        <TreeNode
           v-for="child in children"
           :key="child.name"
           :item="child"
@@ -271,8 +271,8 @@
           <template v-for="slot of forwardSlots" #[slot]="scope">
             <slot :name="slot" v-bind="scope ?? {}" />
           </template>
-        </CustomVcsTreeNode>
-      </CustomSortableList>
+        </TreeNode>
+      </SortableList>
     </v-expand-transition>
   </div>
 </template>
