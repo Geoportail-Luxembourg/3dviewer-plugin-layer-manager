@@ -99,6 +99,16 @@ function getLayerTreeItems(
       .map((l) => {
         const actions: VcsAction[] = [];
         const infoUrl = layerInfoUrls.get(l.name);
+
+        actions.push({
+          name: 'layer-swap.delete',
+          icon: 'mdi-delete',
+          title: 'components.layerSwap.deleteButton',
+          callback: (): void => {
+            l.deactivate();
+          },
+        });
+
         if (infoUrl) {
           actions.push(
             createLinkAction(
@@ -112,15 +122,6 @@ function getLayerTreeItems(
             ),
           );
         }
-
-        actions.push({
-          name: 'layer-swap.delete',
-          icon: 'mdi-delete',
-          title: 'components.layerSwap.deleteButton',
-          callback: (): void => {
-            l.deactivate();
-          },
-        });
 
         const item: LayerTreeItem = {
           name: l.name,
