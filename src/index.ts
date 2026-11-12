@@ -1,17 +1,13 @@
 import type { VcsPlugin, VcsUiApp, PluginConfigEditor } from '@vcmap/ui';
 import { name, version, mapVersion } from '../package.json';
+import { main } from './layer-manager';
 
 type PluginConfig = object;
 type PluginState = object;
 
 type LayerManagerPlugin = VcsPlugin<PluginConfig, PluginState>;
 
-export default function plugin(
-  config: PluginConfig,
-  baseUrl: string,
-): LayerManagerPlugin {
-  // eslint-disable-next-line no-console
-  console.log(config, baseUrl);
+export default function plugin(): LayerManagerPlugin {
   return {
     get name(): string {
       return name;
@@ -22,22 +18,88 @@ export default function plugin(
     get mapVersion(): string {
       return mapVersion;
     },
-    initialize(vcsUiApp: VcsUiApp, state?: PluginState): Promise<void> {
-      // eslint-disable-next-line no-console
-      console.log(
-        'Called before loading the rest of the current context. Passed in the containing Vcs UI App ',
-        vcsUiApp,
-        state,
-      );
-      return Promise.resolve();
+    i18n: {
+      en: {
+        lux3dviewerPluginLayerManager: {
+          components: {
+            layerSwap: {
+              hideButton: 'Hide layer',
+              showButton: 'Show layer',
+              infoButton: 'Metadata',
+              opacity: 'Opacity',
+              dragHandle: 'Drag to reorder',
+              customShaderBlocked:
+                'This layer already has a custom shader. Its opacity cannot be changed here.',
+              opacityUnsupportedTerrain:
+                'Terrain layers do not support opacity.',
+              opacityUnsupported:
+                'Opacity is not supported for this layer type.',
+            },
+          },
+        },
+      },
+      de: {
+        lux3dviewerPluginLayerManager: {
+          components: {
+            layerSwap: {
+              hideButton: 'Ebene ausblenden',
+              showButton: 'Ebene einblenden',
+              infoButton: 'Metadaten',
+              opacity: 'Deckkraft',
+              dragHandle: 'Zum Verschieben ziehen',
+              customShaderBlocked:
+                'Diese Ebene verwendet bereits einen eigenen Shader. Die Deckkraft kann hier nicht geändert werden.',
+              opacityUnsupportedTerrain:
+                'Terrainebenen unterstützen keine Deckkraft.',
+              opacityUnsupported:
+                'Deckkraft wird für diesen Ebenentyp nicht unterstützt.',
+            },
+          },
+        },
+      },
+      fr: {
+        lux3dviewerPluginLayerManager: {
+          components: {
+            layerSwap: {
+              hideButton: 'Masquer la couche',
+              showButton: 'Afficher la couche',
+              infoButton: 'Métadonnées',
+              opacity: 'Opacité',
+              dragHandle: 'Glisser pour réorganiser',
+              customShaderBlocked:
+                'Cette couche utilise déjà un shader personnalisé. Son opacité ne peut pas être modifiée ici.',
+              opacityUnsupportedTerrain:
+                'Les couches de terrain ne prennent pas en charge l’opacité.',
+              opacityUnsupported:
+                'L’opacité n’est pas prise en charge pour ce type de couche.',
+            },
+          },
+        },
+      },
+      lb: {
+        lux3dviewerPluginLayerManager: {
+          components: {
+            layerSwap: {
+              hideButton: 'Schicht verstoppen',
+              showButton: 'Schicht weisen',
+              infoButton: 'Metadaten',
+              opacity: 'Opazitéit',
+              dragHandle: 'Zéien, fir d’Reiefolleg z’änneren',
+              customShaderBlocked:
+                'Dës Schicht huet schonn ee personaliséierte Shader. D’Opazitéit kann hei net geännert ginn.',
+              opacityUnsupportedTerrain:
+                'Terrain-Schichte ginn net mat Opazitéit ënnerstëtzt.',
+              opacityUnsupported:
+                'D’Opazitéit gëtt fir dësen Typ vu Schicht net ënnerstëtzt.',
+            },
+          },
+        },
+      },
     },
-    onVcsAppMounted(vcsUiApp: VcsUiApp): void {
-      // eslint-disable-next-line no-console
-      console.log(
-        'Called when the root UI component is mounted and managers are ready to accept components',
-        vcsUiApp,
-      );
+    initialize(vcsUiApp: VcsUiApp): void {
+      main(vcsUiApp);
     },
+    onVcsAppMounted(): void {},
     /**
      * should return all default values of the configuration
      */
@@ -48,18 +110,13 @@ export default function plugin(
      * should return the plugin's serialization excluding all default values
      */
     toJSON(): PluginConfig {
-      // eslint-disable-next-line no-console
-      console.log('Called when serializing this plugin instance');
       return {};
     },
     /**
      * should return the plugins state
-     * @param {boolean} forUrl
      * @returns {PluginState}
      */
-    getState(forUrl?: boolean): PluginState {
-      // eslint-disable-next-line no-console
-      console.log('Called when collecting state, e.g. for create link', forUrl);
+    getState(): PluginState {
       return {
         prop: '*',
       };
@@ -70,9 +127,6 @@ export default function plugin(
     getConfigEditors(): PluginConfigEditor<object>[] {
       return [];
     },
-    destroy(): void {
-      // eslint-disable-next-line no-console
-      console.log('hook to cleanup');
-    },
+    destroy(): void {},
   };
 }
