@@ -238,7 +238,6 @@
           right
           tooltip-position="right"
           :block-overflow="item.blockOverflow ?? true"
-          class="col-4 pa-0 ml-auto pr-4"
         />
       </slot>
     </v-row>
@@ -338,5 +337,9 @@
     box-sizing: border-box;
     border-top: 2px solid transparent;
     border-bottom: 2px solid transparent;
+  }
+
+  :deep(.vcs-action-button-list .v-spacer) {
+    width: 0;
   }
 </style>
