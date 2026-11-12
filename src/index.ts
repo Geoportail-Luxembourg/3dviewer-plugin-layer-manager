@@ -25,6 +25,7 @@ export default function plugin(): LayerManagerPlugin {
             layerSwap: {
               hideButton: 'Hide layer',
               showButton: 'Show layer',
+              infoButton: 'Metadata',
               opacity: 'Opacity',
               dragHandle: 'Drag to reorder',
               customShaderBlocked:
@@ -43,6 +44,7 @@ export default function plugin(): LayerManagerPlugin {
             layerSwap: {
               hideButton: 'Ebene ausblenden',
               showButton: 'Ebene einblenden',
+              infoButton: 'Metadaten',
               opacity: 'Deckkraft',
               dragHandle: 'Zum Verschieben ziehen',
               customShaderBlocked:
@@ -61,6 +63,7 @@ export default function plugin(): LayerManagerPlugin {
             layerSwap: {
               hideButton: 'Masquer la couche',
               showButton: 'Afficher la couche',
+              infoButton: 'Métadonnées',
               opacity: 'Opacité',
               dragHandle: 'Glisser pour réorganiser',
               customShaderBlocked:
@@ -79,6 +82,7 @@ export default function plugin(): LayerManagerPlugin {
             layerSwap: {
               hideButton: 'Schicht verstoppen',
               showButton: 'Schicht weisen',
+              infoButton: 'Metadaten',
               opacity: 'Opazitéit',
               dragHandle: 'Zéien, fir d’Reiefolleg z’änneren',
               customShaderBlocked:

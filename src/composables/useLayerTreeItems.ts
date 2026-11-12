@@ -7,10 +7,13 @@ import {
   WMSLayer,
 } from '@vcmap/core';
 import type { Layer } from '@vcmap/core';
-import { WMSGroupContentTreeItem } from '@vcmap/ui';
+import { createLinkAction, WMSGroupContentTreeItem } from '@vcmap/ui';
 import type { VcsTreeNodeItem, VcsUiApp } from '@vcmap/ui';
 
 export const wmsLayerName = Symbol('wmsLayerName');
+
+const metadataUrl =
+  'https://geocatalogue.geoportail.lu/geonetwork/srv/eng/catalog.search#/metadata/4c8abde8-f7dd-49d8-a977-43a1797f2822';
 
 export type LayerTreeItem = VcsTreeNodeItem & {
   index: number;
@@ -80,6 +83,15 @@ function getLayerTreeItems(
           title: (l.properties?.title as string | undefined) || l.name,
           index: app.layers.indexOf(l),
           actions: [
+            createLinkAction(
+              {
+                name: 'layer-swap.info',
+                icon: '$vcsInfo',
+                title:
+                  'lux3dviewerPluginLayerManager.components.layerSwap.infoButton',
+              },
+              metadataUrl,
+            ),
             {
               name: 'layer-swap.delete',
               icon: 'mdi-delete',
