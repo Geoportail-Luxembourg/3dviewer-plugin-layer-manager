@@ -2,8 +2,8 @@
   import { inject } from 'vue';
   import { VSheet } from 'vuetify/components';
   import type { VcsTreeNodeItem, VcsUiApp } from '@vcmap/ui';
-  import CustomVcsTreeview from './CustomVcsTreeview.vue';
-  import CustomLayerOptions from './CustomLayerOptions.vue';
+  import Treeview from './Treeview.vue';
+  import LayerOptions from './LayerOptions.vue';
   import nodeState from '../stores/node.store';
   import { useLayerTreeItems } from '../composables/useLayerTreeItems';
   import { useLayerSwapDrag } from '../composables/useLayerSwapDrag';
@@ -25,7 +25,7 @@
 
 <template>
   <div class="layer-tree">
-    <CustomVcsTreeview
+    <Treeview
       v-if="items && items.length"
       :items="items"
       :show-searchbar="false"
@@ -35,12 +35,9 @@
       @click="toggleOptions"
     >
       <template #options="{ item }">
-        <CustomLayerOptions
-          v-if="nodeState.isExpanded(item.name)"
-          :item="item"
-        />
+        <LayerOptions v-if="nodeState.isExpanded(item.name)" :item="item" />
       </template>
-    </CustomVcsTreeview>
+    </Treeview>
     <v-sheet v-else class="ma-2">
       {{ $t('content.empty') }}
     </v-sheet>
