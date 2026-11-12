@@ -27,6 +27,8 @@ export default function plugin(): LayerManagerPlugin {
               showButton: 'Show layer',
               opacity: 'Opacity',
               dragHandle: 'Drag to reorder',
+              customShaderBlocked:
+                'This layer already has a custom shader. Its opacity cannot be changed here.',
             },
           },
         },
@@ -39,6 +41,8 @@ export default function plugin(): LayerManagerPlugin {
               showButton: 'Ebene einblenden',
               opacity: 'Deckkraft',
               dragHandle: 'Zum Verschieben ziehen',
+              customShaderBlocked:
+                'Diese Ebene verwendet bereits einen eigenen Shader. Die Deckkraft kann hier nicht geändert werden.',
             },
           },
         },
