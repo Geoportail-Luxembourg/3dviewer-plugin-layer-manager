@@ -7,7 +7,7 @@
   import SortableList from './SortableList.vue';
   import TreeNode from './TreeNode.vue';
   import TreeviewSearchbar from './TreeviewSearchbar.vue';
-  import type { TreeItemMove } from '../composables/treeSortable';
+  import type { TreeItemMove } from '../models/treeItemMove';
 
   defineOptions({ name: 'VcsTreeview' });
 
@@ -18,6 +18,7 @@
       draggable?: boolean;
       openAll?: boolean;
       openOnClick?: boolean;
+      expandedName?: string | null;
       showSearchbar?: boolean;
       stickySearchbar?: boolean;
       searchbarPlaceholder?: string;
@@ -32,6 +33,7 @@
       draggable: false,
       openAll: false,
       openOnClick: false,
+      expandedName: undefined,
       showSearchbar: false,
       stickySearchbar: false,
       searchbarPlaceholder: undefined,
@@ -42,6 +44,7 @@
   const emit = defineEmits<{
     itemMoved: [event: ItemMovedEvent];
     click: [item: VcsTreeNodeItem];
+    optionsToggled: [name: string];
   }>();
 
   const localSearchValue = defineModel<string>('search', { default: '' });
@@ -97,6 +100,10 @@
 
   function handleNodeItemMoved(event: ItemMovedEvent): void {
     emit('itemMoved', event);
+  }
+
+  function handleOptionsToggled(name: string): void {
+    emit('optionsToggled', name);
   }
 
   function itemClicked(
@@ -168,10 +175,12 @@
           :custom-filter="customFilter"
           :open-on-click="openOnClick"
           :item-children="itemChildren"
+          :expanded-name="expandedName"
           :draggable="isDraggable"
           @mousedown.shift="$event.preventDefault()"
           @item-toggled="itemToggled"
           @item-moved="handleNodeItemMoved"
+          @options-toggled="handleOptionsToggled"
           @click="handleItemClick"
         >
           <template v-for="slot of forwardSlots" #[slot]="scope">

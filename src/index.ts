@@ -21,6 +21,9 @@ export default function plugin(): LayerManagerPlugin {
     i18n: {
       en: {
         lux3dviewerPluginLayerManager: {
+          layerManager: {
+            title: 'Layer manager',
+          },
           components: {
             layerSwap: {
               hideButton: 'Hide layer',
@@ -28,6 +31,7 @@ export default function plugin(): LayerManagerPlugin {
               infoButton: 'Metadata',
               opacity: 'Opacity',
               dragHandle: 'Drag to reorder',
+              optionsButton: 'Layer options',
               customShaderBlocked:
                 'This layer already has a custom shader. Its opacity cannot be changed here.',
               opacityUnsupportedTerrain:
@@ -40,6 +44,9 @@ export default function plugin(): LayerManagerPlugin {
       },
       de: {
         lux3dviewerPluginLayerManager: {
+          layerManager: {
+            title: 'Ebenenmanager',
+          },
           components: {
             layerSwap: {
               hideButton: 'Ebene ausblenden',
@@ -47,6 +54,7 @@ export default function plugin(): LayerManagerPlugin {
               infoButton: 'Metadaten',
               opacity: 'Deckkraft',
               dragHandle: 'Zum Verschieben ziehen',
+              optionsButton: 'Ebenenoptionen',
               customShaderBlocked:
                 'Diese Ebene verwendet bereits einen eigenen Shader. Die Deckkraft kann hier nicht geändert werden.',
               opacityUnsupportedTerrain:
@@ -59,6 +67,9 @@ export default function plugin(): LayerManagerPlugin {
       },
       fr: {
         lux3dviewerPluginLayerManager: {
+          layerManager: {
+            title: 'Gestionnaire de couches',
+          },
           components: {
             layerSwap: {
               hideButton: 'Masquer la couche',
@@ -66,6 +77,7 @@ export default function plugin(): LayerManagerPlugin {
               infoButton: 'Métadonnées',
               opacity: 'Opacité',
               dragHandle: 'Glisser pour réorganiser',
+              optionsButton: 'Options de la couche',
               customShaderBlocked:
                 'Cette couche utilise déjà un shader personnalisé. Son opacité ne peut pas être modifiée ici.',
               opacityUnsupportedTerrain:
@@ -78,6 +90,9 @@ export default function plugin(): LayerManagerPlugin {
       },
       lb: {
         lux3dviewerPluginLayerManager: {
+          layerManager: {
+            title: 'Schichtemanager',
+          },
           components: {
             layerSwap: {
               hideButton: 'Schicht verstoppen',
@@ -85,6 +100,7 @@ export default function plugin(): LayerManagerPlugin {
               infoButton: 'Metadaten',
               opacity: 'Opazitéit',
               dragHandle: 'Zéien, fir d’Reiefolleg z’änneren',
+              optionsButton: 'Schichtoptiounen',
               customShaderBlocked:
                 'Dës Schicht huet schonn ee personaliséierte Shader. D’Opazitéit kann hei net geännert ginn.',
               opacityUnsupportedTerrain:

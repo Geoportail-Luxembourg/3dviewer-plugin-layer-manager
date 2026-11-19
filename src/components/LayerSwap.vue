@@ -1,10 +1,8 @@
 <script setup lang="ts">
-  import { inject } from 'vue';
+  import { inject, ref } from 'vue';
   import { VSheet } from 'vuetify/components';
   import type { VcsTreeNodeItem, VcsUiApp } from '@vcmap/ui';
   import Treeview from './Treeview.vue';
-  import LayerOptions from './LayerOptions.vue';
-  import nodeState from '../stores/node.store';
   import { useLayerTreeItems } from '../composables/useLayerTreeItems';
   import { useLayerSwapDrag } from '../composables/useLayerSwapDrag';
 
@@ -13,13 +11,18 @@
   const app = inject<VcsUiApp>('vcsApp')!;
   const { items, refreshItems } = useLayerTreeItems();
   const { move } = useLayerSwapDrag(refreshItems);
+  const expandedName = ref<string | null>(null);
 
-  function toggleOptions(item: VcsTreeNodeItem): void {
-    if (!app.layers.getByKey(item.name)) {
+  function toggleOptionsByName(name: string): void {
+    if (!app.layers.getByKey(name)) {
       return;
     }
 
-    nodeState.toggleExpandedNode(item.name);
+    expandedName.value = expandedName.value === name ? null : name;
+  }
+
+  function toggleOptions(item: VcsTreeNodeItem): void {
+    toggleOptionsByName(item.name);
   }
 </script>
 
@@ -28,16 +31,15 @@
     <Treeview
       v-if="items && items.length"
       :items="items"
-      :show-searchbar="false"
+      :expanded-name="expandedName"
+      :show-searchbar="true"
+      :sticky-searchbar="true"
       :draggable="true"
       open-all
       @item-moved="move"
+      @options-toggled="toggleOptionsByName"
       @click="toggleOptions"
-    >
-      <template #options="{ item }">
-        <LayerOptions v-if="nodeState.isExpanded(item.name)" :item="item" />
-      </template>
-    </Treeview>
+    />
     <v-sheet v-else class="ma-2">
       {{ $t('content.empty') }}
     </v-sheet>

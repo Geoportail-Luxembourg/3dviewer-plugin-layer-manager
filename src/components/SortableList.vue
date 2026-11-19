@@ -2,7 +2,7 @@
   import { ref, watch } from 'vue';
   import { useSortable } from '@vueuse/integrations/useSortable';
   import type { SortableEvent } from 'sortablejs';
-  import type { TreeItemMove } from '../composables/treeSortable';
+  import type { TreeItemMove } from '../models/treeItemMove';
 
   const props = defineProps<{
     level: number;

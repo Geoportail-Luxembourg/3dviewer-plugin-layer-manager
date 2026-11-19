@@ -13,7 +13,7 @@
     setShaderOpacity,
     toggleLayerOpacity,
     toggleShaderOpacity,
-  } from '../composables/layerOpacity';
+  } from '../utils/layerOpacity';
 
   const props = defineProps<{
     item: VcsTreeNodeItem;

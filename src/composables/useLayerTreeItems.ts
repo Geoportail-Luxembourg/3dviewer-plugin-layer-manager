@@ -19,6 +19,7 @@ export const wmsLayerName = Symbol('wmsLayerName');
 
 export type LayerTreeItem = VcsTreeNodeItem & {
   index: number;
+  infoAction?: VcsAction;
   [vcsLayerName]?: string;
   [wmsLayerName]?: string;
 };
@@ -97,21 +98,19 @@ function getLayerTreeItems(
     [...app.layers]
       .filter((l) => layerFilter(app, l))
       .map((l) => {
-        const actions: VcsAction[] = [];
-        const infoUrl = layerInfoUrls.get(l.name);
-
-        actions.push({
-          name: 'layer-swap.delete',
-          icon: 'mdi-delete',
-          title: 'components.layerSwap.deleteButton',
-          callback: (): void => {
-            l.deactivate();
+        const actions: VcsAction[] = [
+          {
+            name: 'layer-swap.delete',
+            icon: 'mdi-delete',
+            title: 'components.layerSwap.deleteButton',
+            callback: (): void => {
+              l.deactivate();
+            },
           },
-        });
-
-        if (infoUrl) {
-          actions.push(
-            createLinkAction(
+        ];
+        const infoUrl = layerInfoUrls.get(l.name);
+        const infoAction = infoUrl
+          ? createLinkAction(
               {
                 name: 'layer-swap.info',
                 icon: '$vcsInfo',
@@ -119,15 +118,15 @@ function getLayerTreeItems(
                   'lux3dviewerPluginLayerManager.components.layerSwap.infoButton',
               },
               infoUrl,
-            ),
-          );
-        }
+            )
+          : undefined;
 
         const item: LayerTreeItem = {
           name: l.name,
           title: (l.properties?.title as string | undefined) || l.name,
           index: app.layers.indexOf(l),
           actions,
+          infoAction,
         };
 
         const wmsGroupItem = wmsGroupItemsMap.get(l.name);

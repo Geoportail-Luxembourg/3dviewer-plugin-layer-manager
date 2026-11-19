@@ -9,8 +9,9 @@
   } from '@vcmap/ui';
   import type { ItemMovedEvent, VcsTreeNodeItem } from '@vcmap/ui';
   import SortableList from './SortableList.vue';
-  import ImageElementInjector from './ImageElementInjector.vue';
-  import type { TreeItemMove } from '../composables/treeSortable';
+  import LayerOptions from './LayerOptions.vue';
+  import type { LayerTreeItem } from '../composables/useLayerTreeItems';
+  import type { TreeItemMove } from '../models/treeItemMove';
 
   defineOptions({ name: 'VcsTreeNode' });
 
@@ -20,6 +21,7 @@
       itemChildren?: string;
       draggable?: boolean;
       level?: number;
+      expandedName?: string | null;
       opened: string[];
       openOnClick?: boolean;
       search?: string;
@@ -33,6 +35,7 @@
       itemChildren: 'children',
       draggable: false,
       level: 0,
+      expandedName: undefined,
       openOnClick: false,
       search: undefined,
       customFilter: undefined,
@@ -44,12 +47,14 @@
     itemToggled: [name: string];
     click: [item: VcsTreeNodeItem, event: MouseEvent];
     itemMoved: [event: ItemMovedEvent];
+    optionsToggled: [name: string];
   }>();
 
   const instance = getCurrentInstance();
   const vm = instance!.proxy as unknown as { $t: (key: string) => string };
   const fontSize = useFontSize();
   const iconSize = computed(() => fontSize.value * (1.2 + 0.1 / 3));
+  const infoAction = computed(() => (props.item as LayerTreeItem).infoAction);
   const slots = useSlots();
   const forwardSlots = getForwardSlots(slots);
   const searchOpenOverride = ref<boolean | undefined>(undefined);
@@ -175,6 +180,14 @@
       position: move.position,
     });
   }
+
+  function handleOptionsToggle(): void {
+    emit('optionsToggled', props.item.name);
+  }
+
+  function bubbleOptionsToggled(name: string): void {
+    emit('optionsToggled', name);
+  }
 </script>
 
 <template>
@@ -188,6 +201,7 @@
       no-gutters
       class="treenode flex-nowrap text-truncate"
       :class="`level-${level} ${isGroup ? 'group' : 'item'}`"
+      :style="{ '--tree-level': String(level) }"
     >
       <VBtn
         v-if="draggable"
@@ -200,6 +214,17 @@
         @click.stop
       />
       <VBtn
+        v-if="infoAction"
+        icon
+        class="info-action ml-2 mr-2"
+        :title="infoAction.title ? $t(infoAction.title) : undefined"
+        variant="text"
+        @click.stop="infoAction.callback($event)"
+      >
+        <VIcon :size="iconSize">{{ infoAction.icon }}</VIcon>
+      </VBtn>
+      <VBtn v-else icon class="info-action ml-2 mr-2" variant="text" disabled />
+      <VBtn
         v-if="isGroup"
         class="chevron-btn"
         variant="text"
@@ -209,17 +234,15 @@
       />
       <slot name="prepend" v-bind="{ item }">
         <span
+          v-if="typeof item?.icon === 'string'"
           class="prepend"
           :class="{
             'text-disabled': item.disabled,
           }"
         >
-          <div v-if="item.icon">
-            <v-icon v-if="typeof item?.icon === 'string'" :size="iconSize">
-              {{ item.icon }}
-            </v-icon>
-            <ImageElementInjector v-else :element="item.icon" />
-          </div>
+          <v-icon :size="iconSize">
+            {{ item.icon }}
+          </v-icon>
         </span>
       </slot>
       <slot name="title" v-bind="{ item }">
@@ -229,9 +252,24 @@
           @click="handleTitleClick"
         />
       </slot>
+      <VBtn
+        v-if="level === 0"
+        icon
+        class="options-toggle ml-1"
+        :title="
+          $t('lux3dviewerPluginLayerManager.components.layerSwap.optionsButton')
+        "
+        variant="text"
+        @click.stop="handleOptionsToggle"
+      >
+        <VIcon :size="iconSize">
+          {{ expandedName === item.name ? 'mdi-close' : '$vcsKebab' }}
+        </VIcon>
+      </VBtn>
       <slot name="append" v-bind="{ item }">
         <VcsActionButtonList
           v-if="item.actions && item.actions.length > 0"
+          class="ml-1"
           :actions="item.actions"
           :overflow-count="3"
           :disabled="item.disabled"
@@ -241,7 +279,9 @@
         />
       </slot>
     </v-row>
-    <slot name="options" v-bind="{ item }" />
+    <slot name="options" v-bind="{ item }">
+      <LayerOptions v-if="expandedName === item.name" :item="item" />
+    </slot>
     <v-expand-transition>
       <SortableList
         v-if="isOpen && children.length"
@@ -260,6 +300,7 @@
             showAllChildren || (isGroup && matchesSelf && !hasDescendantMatch)
           "
           :level="level + 1"
+          :expanded-name="expandedName"
           :open-on-click="openOnClick"
           :item-children="itemChildren"
           :opened="opened"
@@ -267,6 +308,7 @@
           @item-toggled="bubbleItemToggled"
           @click="bubbleItemClicked"
           @item-moved="bubbleItemMoved"
+          @options-toggled="bubbleOptionsToggled"
         >
           <template v-for="slot of forwardSlots" #[slot]="scope">
             <slot :name="slot" v-bind="scope ?? {}" />
@@ -285,17 +327,10 @@
   .treenode {
     align-items: center !important;
     min-height: calc(var(--v-vcs-font-size) * 2 + 6px);
-  }
-  @for $i from 0 through 6 {
-    .level-#{$i} {
-      margin-left: calc(var(--v-vcs-font-size) * $i + 2px);
-      &.item {
-        & > .prepend:not(:has(.v-icon)) {
-          margin-left: calc(var(--v-vcs-font-size) * 2);
-        }
-        & > .prepend:has(.v-icon) {
-          margin-left: 4px;
-        }
+    margin-left: calc(var(--v-vcs-font-size) * var(--tree-level, 0) + 2px);
+    &.item {
+      & > .prepend:has(.v-icon) {
+        margin-left: 4px;
       }
     }
   }
