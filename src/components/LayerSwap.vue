@@ -32,8 +32,6 @@
       v-if="items && items.length"
       :items="items"
       :expanded-name="expandedName"
-      :show-searchbar="true"
-      :sticky-searchbar="true"
       :draggable="true"
       open-all
       @item-moved="move"

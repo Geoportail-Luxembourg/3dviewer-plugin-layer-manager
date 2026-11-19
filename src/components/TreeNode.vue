@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import { computed, getCurrentInstance, ref, useSlots, watch } from 'vue';
+  import { computed, useSlots } from 'vue';
   import { VBtn, VExpandTransition, VIcon, VRow } from 'vuetify/components';
   import {
     getForwardSlots,
@@ -24,12 +24,6 @@
       expandedName?: string | null;
       opened: string[];
       openOnClick?: boolean;
-      search?: string;
-      customFilter?: (
-        item: VcsTreeNodeItem,
-        search: string | undefined,
-      ) => boolean;
-      showAllChildren?: boolean;
     }>(),
     {
       itemChildren: 'children',
@@ -37,9 +31,6 @@
       level: 0,
       expandedName: undefined,
       openOnClick: false,
-      search: undefined,
-      customFilter: undefined,
-      showAllChildren: false,
     },
   );
 
@@ -50,14 +41,11 @@
     optionsToggled: [name: string];
   }>();
 
-  const instance = getCurrentInstance();
-  const vm = instance!.proxy as unknown as { $t: (key: string) => string };
   const fontSize = useFontSize();
   const iconSize = computed(() => fontSize.value * (1.2 + 0.1 / 3));
   const infoAction = computed(() => (props.item as LayerTreeItem).infoAction);
   const slots = useSlots();
   const forwardSlots = getForwardSlots(slots);
-  const searchOpenOverride = ref<boolean | undefined>(undefined);
 
   const children = computed(
     () =>
@@ -66,77 +54,15 @@
       ] ?? [],
   );
 
-  function translatedTitle(item: VcsTreeNodeItem): string {
-    return item.title ? vm.$t(item.title) : item.name;
-  }
-
-  function doesItemMatch(item: VcsTreeNodeItem): boolean {
-    if (!props.search) {
-      return true;
-    }
-
-    if (props.customFilter) {
-      return props.customFilter(item, props.search);
-    }
-
-    return (
-      translatedTitle(item)
-        .toLocaleLowerCase()
-        .indexOf(props.search.toLocaleLowerCase()) > -1
-    );
-  }
-
-  function doesDescendantMatch(item: VcsTreeNodeItem): boolean {
-    const itemChildren = (
-      item as unknown as Record<string, VcsTreeNodeItem[] | undefined>
-    )[props.itemChildren];
-    return (
-      itemChildren?.some(
-        (child) => doesItemMatch(child) || doesDescendantMatch(child),
-      ) ?? false
-    );
-  }
-
-  const matchesSelf = computed(() => doesItemMatch(props.item));
-  const hasDescendantMatch = computed(() => doesDescendantMatch(props.item));
-
-  const matchFilter = computed(() => {
-    if (!props.search || props.showAllChildren) {
-      return true;
-    }
-
-    return matchesSelf.value || hasDescendantMatch.value;
-  });
-
-  const searchOpen = computed(
-    () => searchOpenOverride.value ?? hasDescendantMatch.value,
-  );
-
   const isOpen = computed(
-    () =>
-      children.value.length > 0 &&
-      (props.search
-        ? searchOpen.value
-        : props.opened.includes(props.item.name)),
+    () => children.value.length > 0 && props.opened.includes(props.item.name),
   );
 
   const isGroup = computed(
     () => children.value.length > 0 || props.item.forceNodeDisplay,
   );
 
-  watch(
-    () => props.search,
-    () => {
-      searchOpenOverride.value = undefined;
-    },
-  );
-
   function toggleCurrentItem(): void {
-    if (props.search) {
-      searchOpenOverride.value = !isOpen.value;
-      return;
-    }
-
     emit('itemToggled', props.item.name);
   }
 
@@ -144,7 +70,6 @@
     emit('click', props.item, event);
 
     if (
-      props.search &&
       !props.item?.clickable &&
       props.openOnClick &&
       !props.item?.disabled &&
@@ -192,7 +117,6 @@
 
 <template>
   <div
-    v-if="matchFilter"
     class="vcs-tree-node"
     :class="level > 0 ? `sortable-level-${level}` : undefined"
     :data-tree-item-name="item.name"
@@ -294,11 +218,6 @@
           v-for="child in children"
           :key="child.name"
           :item="child"
-          :search="search"
-          :custom-filter="customFilter"
-          :show-all-children="
-            showAllChildren || (isGroup && matchesSelf && !hasDescendantMatch)
-          "
           :level="level + 1"
           :expanded-name="expandedName"
           :open-on-click="openOnClick"

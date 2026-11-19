@@ -1,12 +1,11 @@
 <script setup lang="ts">
-  import { computed, useSlots, watch } from 'vue';
+  import { useSlots, watch } from 'vue';
   import { useDisplay } from 'vuetify';
   import { getLogger } from '@vcsuite/logger';
   import { getForwardSlots } from '@vcmap/ui';
   import type { ItemMovedEvent, VcsTreeNodeItem } from '@vcmap/ui';
   import SortableList from './SortableList.vue';
   import TreeNode from './TreeNode.vue';
-  import TreeviewSearchbar from './TreeviewSearchbar.vue';
   import type { TreeItemMove } from '../models/treeItemMove';
 
   defineOptions({ name: 'VcsTreeview' });
@@ -19,13 +18,6 @@
       openAll?: boolean;
       openOnClick?: boolean;
       expandedName?: string | null;
-      showSearchbar?: boolean;
-      stickySearchbar?: boolean;
-      searchbarPlaceholder?: string;
-      customFilter?: (
-        item: VcsTreeNodeItem,
-        search: string | undefined,
-      ) => boolean;
     }>(),
     {
       items: () => [],
@@ -34,10 +26,6 @@
       openAll: false,
       openOnClick: false,
       expandedName: undefined,
-      showSearchbar: false,
-      stickySearchbar: false,
-      searchbarPlaceholder: undefined,
-      customFilter: undefined,
     },
   );
 
@@ -47,7 +35,6 @@
     optionsToggled: [name: string];
   }>();
 
-  const localSearchValue = defineModel<string>('search', { default: '' });
   const localOpenedItems = defineModel<string[]>('opened', {
     default: () => [],
   });
@@ -78,10 +65,6 @@
   }
 
   const { xs } = useDisplay();
-
-  const isDraggable = computed(
-    () => !localSearchValue.value && props.draggable,
-  );
 
   function handleRootItemMoved(move: TreeItemMove): void {
     const item = props.items.find((i) => i.name === move.itemName);
@@ -138,26 +121,11 @@
 </script>
 
 <template>
-  <div
-    class="vcs-treeview"
-    :class="{ 'sticky-searchbar': stickySearchbar && showSearchbar }"
-  >
-    <TreeviewSearchbar
-      v-if="showSearchbar"
-      v-model="localSearchValue"
-      :placeholder="searchbarPlaceholder"
-    >
-      <template #prepend>
-        <slot name="search-prepend" />
-      </template>
-      <template #append="{ hasFilter }">
-        <slot name="search-append" :has-filter="hasFilter" />
-      </template>
-    </TreeviewSearchbar>
+  <div class="vcs-treeview">
     <SortableList
       class="treeview-items"
       :level="0"
-      :disabled="!isDraggable"
+      :disabled="!draggable"
       @item-moved="handleRootItemMoved"
     >
       <div
@@ -171,12 +139,10 @@
           class="root-node"
           :item="item"
           :path="[index]"
-          :search="localSearchValue"
-          :custom-filter="customFilter"
           :open-on-click="openOnClick"
           :item-children="itemChildren"
           :expanded-name="expandedName"
-          :draggable="isDraggable"
+          :draggable="draggable"
           @mousedown.shift="$event.preventDefault()"
           @item-toggled="itemToggled"
           @item-moved="handleNodeItemMoved"
@@ -202,21 +168,6 @@
 
   .treeview-items {
     display: block;
-  }
-  .vcs-treeview.sticky-searchbar {
-    --searchbar-height: calc(var(--v-vcs-font-size) * 2 + 18px);
-    margin-top: var(--searchbar-height);
-
-    > .vcs-treeview-searchbar {
-      width: 100%;
-      position: absolute !important;
-      margin-top: calc(var(--searchbar-height) * -1);
-      z-index: 2;
-    }
-  }
-  // Hide node component when not rendered (e.g. filtered by search)
-  .vcs-treeitem:not(:has(.vcs-tree-node)) {
-    display: none;
   }
   .vcs-treeitem:not(:last-child) {
     border-bottom: 1px solid rgb(var(--v-theme-base-lighten-2));
