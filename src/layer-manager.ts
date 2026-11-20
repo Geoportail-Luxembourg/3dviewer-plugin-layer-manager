@@ -5,7 +5,7 @@ import {
   WindowSlot,
 } from '@vcmap/ui';
 import LayerSwap from './components/LayerSwap.vue';
-import config from '../config.json';
+import { name as pluginName } from '../package.json';
 
 export const layerManagerOptions = {
   name: 'layerManager',
@@ -21,7 +21,7 @@ export function main(app: VcsUiApp): void {
       icon: layerManagerOptions.icon,
     },
     {
-      id: config.name,
+      id: pluginName,
       props: {},
       state: {
         headerTitle: layerManagerOptions.title,
@@ -31,12 +31,12 @@ export function main(app: VcsUiApp): void {
       component: LayerSwap,
     },
     app.windowManager,
-    config.name,
+    pluginName,
   );
 
   app.navbarManager.add(
     { id: layerManagerOptions.name, action, weight: 0.5 },
-    config.name,
+    pluginName,
     ButtonLocation.CONTENT,
     { desktop: true, tablet: true, mobile: true },
   );
