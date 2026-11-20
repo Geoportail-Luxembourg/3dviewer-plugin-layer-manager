@@ -35,7 +35,7 @@ export function main(app: VcsUiApp): void {
   );
 
   app.navbarManager.add(
-    { id: layerManagerOptions.name, action },
+    { id: layerManagerOptions.name, action, weight: 0.5 },
     config.name,
     ButtonLocation.CONTENT,
     { desktop: true, tablet: true, mobile: true },
