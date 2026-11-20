@@ -1,8 +1,8 @@
 <script setup lang="ts">
   import { computed, inject, ref, watch } from 'vue';
   import { TerrainLayer } from '@vcmap/core';
-  import { VAlert, VBtn } from 'vuetify/components';
-  import { VcsSlider } from '@vcmap/ui';
+  import { VAlert, VBtn, VIcon } from 'vuetify/components';
+  import { useFontSize, VcsSlider } from '@vcmap/ui';
   import type { VcsTreeNodeItem, VcsUiApp } from '@vcmap/ui';
   import {
     getShaderOpacity,
@@ -15,11 +15,25 @@
     toggleShaderOpacity,
   } from '../utils/layerOpacity';
 
-  const props = defineProps<{
-    item: VcsTreeNodeItem;
+  const props = withDefaults(
+    defineProps<{
+      item: VcsTreeNodeItem;
+      showSplit?: boolean;
+      splitActive?: boolean;
+    }>(),
+    {
+      showSplit: false,
+      splitActive: false,
+    },
+  );
+
+  const emit = defineEmits<{
+    splitToggled: [];
   }>();
 
   const app = inject<VcsUiApp>('vcsApp')!;
+  const fontSize = useFontSize();
+  const iconSize = computed(() => fontSize.value * (1.2 + 0.1 / 3));
   const layer = computed(() => app.layers.getByKey(props.item.name));
   const opacityLayer = computed(() => {
     const activeLayer = layer.value;
@@ -86,10 +100,14 @@
       opacity.value = getShaderOpacity(shaderLayer.value);
     }
   }
+
+  function onSplitToggle(): void {
+    emit('splitToggled');
+  }
 </script>
 
 <template>
-  <div class="flex flex-col items-center gap-2 px-3 py-1 mr-2">
+  <div class="flex flex-col items-center gap-2 px-3 py-1">
     <VAlert
       v-if="shaderBlocked"
       type="info"
@@ -103,8 +121,8 @@
         )
       }}
     </VAlert>
-    <template v-if="opacityLayer || shaderLayer">
-      <div class="opacity-row">
+    <div v-if="opacityLayer || shaderLayer || showSplit" class="opacity-row">
+      <template v-if="opacityLayer || shaderLayer">
         <VBtn
           :icon="isHidden ? 'mdi-eye-off' : 'mdi-eye'"
           :title="
@@ -127,9 +145,32 @@
           :disabled="shaderBlocked"
           @update:model-value="onOpacityChange"
         />
-      </div>
-    </template>
-    <VAlert v-else type="info" variant="tonal" density="compact" class="w-100">
+      </template>
+      <VBtn
+        v-if="showSplit"
+        icon
+        class="split-toggle ml-auto"
+        :color="splitActive ? 'primary' : undefined"
+        :title="
+          $t(
+            splitActive
+              ? 'lux3dviewerPluginLayerManager.components.layerSwap.splitViewActiveButton'
+              : 'lux3dviewerPluginLayerManager.components.layerSwap.splitViewButton',
+          )
+        "
+        variant="text"
+        @click.stop="onSplitToggle"
+      >
+        <VIcon :size="iconSize">$vcsSplitView</VIcon>
+      </VBtn>
+    </div>
+    <VAlert
+      v-if="!opacityLayer && !shaderLayer"
+      type="info"
+      variant="tonal"
+      density="compact"
+      class="w-100"
+    >
       {{ $t(unsupportedMessageKey) }}
     </VAlert>
   </div>
@@ -139,6 +180,7 @@
   .opacity-row {
     display: flex;
     align-items: center;
+    width: 100%;
     gap: 1rem;
   }
 
