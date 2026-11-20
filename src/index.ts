@@ -32,10 +32,12 @@ export default function plugin(): LayerManagerPlugin {
               opacity: 'Opacity',
               dragHandle: 'Drag to reorder',
               optionsButton: 'Layer options',
+              splitViewButton: 'Show split view',
+              splitViewActiveButton: 'Hide split view',
               customShaderBlocked:
                 'This layer already has a custom shader. Its opacity cannot be changed here.',
               opacityUnsupportedTerrain:
-                'Terrain layers do not support opacity.',
+                'Terrain layers do not support opacity or split view.',
               opacityUnsupported:
                 'Opacity is not supported for this layer type.',
             },
@@ -55,10 +57,12 @@ export default function plugin(): LayerManagerPlugin {
               opacity: 'Deckkraft',
               dragHandle: 'Zum Verschieben ziehen',
               optionsButton: 'Ebenenoptionen',
+              splitViewButton: 'Geteilte Ansicht anzeigen',
+              splitViewActiveButton: 'Geteilte Ansicht ausblenden',
               customShaderBlocked:
                 'Diese Ebene verwendet bereits einen eigenen Shader. Die Deckkraft kann hier nicht geändert werden.',
               opacityUnsupportedTerrain:
-                'Terrainebenen unterstützen keine Deckkraft.',
+                'Terrainebenen unterstützen weder Deckkraft noch geteilte Ansicht.',
               opacityUnsupported:
                 'Deckkraft wird für diesen Ebenentyp nicht unterstützt.',
             },
@@ -78,10 +82,12 @@ export default function plugin(): LayerManagerPlugin {
               opacity: 'Opacité',
               dragHandle: 'Glisser pour réorganiser',
               optionsButton: 'Options de la couche',
+              splitViewButton: 'Afficher la vue partagée',
+              splitViewActiveButton: 'Masquer la vue partagée',
               customShaderBlocked:
                 'Cette couche utilise déjà un shader personnalisé. Son opacité ne peut pas être modifiée ici.',
               opacityUnsupportedTerrain:
-                'Les couches de terrain ne prennent pas en charge l’opacité.',
+                'Les couches de terrain ne prennent pas en charge l’opacité ni la vue partagée.',
               opacityUnsupported:
                 'L’opacité n’est pas prise en charge pour ce type de couche.',
             },
@@ -101,10 +107,12 @@ export default function plugin(): LayerManagerPlugin {
               opacity: 'Opazitéit',
               dragHandle: 'Zéien, fir d’Reiefolleg z’änneren',
               optionsButton: 'Schichtoptiounen',
+              splitViewButton: 'Geteilte Vue weisen',
+              splitViewActiveButton: 'Geteilte Vue verstoppen',
               customShaderBlocked:
                 'Dës Schicht huet schonn ee personaliséierte Shader. D’Opazitéit kann hei net geännert ginn.',
               opacityUnsupportedTerrain:
-                'Terrain-Schichte ginn net mat Opazitéit ënnerstëtzt.',
+                'Terrain-Schichte ginn net mat Opazitéit oder geteilter Vue ënnerstëtzt.',
               opacityUnsupported:
                 'D’Opazitéit gëtt fir dësen Typ vu Schicht net ënnerstëtzt.',
             },
