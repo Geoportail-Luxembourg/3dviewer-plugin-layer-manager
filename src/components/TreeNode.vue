@@ -266,8 +266,8 @@
   }
   // set the size of the buttons, except for the ActionButtonList
   :deep(.v-btn):not(.vcs-button) {
-    width: var(--v-vcs-font-size);
-    height: var(--v-vcs-font-size);
+    width: calc(var(--v-vcs-font-size) * 1.25);
+    height: calc(var(--v-vcs-font-size) * 1.5);
     // for alignment of chevron
     display: flex;
     &.chevron-btn {
@@ -277,6 +277,9 @@
         font-size: calc(var(--v-icon-size-multiplier) * 1.25em);
       }
     }
+  }
+  :deep(.v-btn .v-icon svg) {
+    overflow: visible;
   }
   // remove hover shadow over button
   :deep(.v-btn__overlay) {
