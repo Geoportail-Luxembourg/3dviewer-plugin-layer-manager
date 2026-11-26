@@ -1,8 +1,8 @@
 <script setup lang="ts">
   import { computed, inject, ref, watch } from 'vue';
   import { TerrainLayer } from '@vcmap/core';
-  import { VAlert, VBtn } from 'vuetify/components';
-  import { VcsSlider } from '@vcmap/ui';
+  import { VAlert, VBtn, VIcon } from 'vuetify/components';
+  import { useFontSize, VcsSlider } from '@vcmap/ui';
   import type { VcsTreeNodeItem, VcsUiApp } from '@vcmap/ui';
   import {
     getShaderOpacity,
@@ -14,13 +14,35 @@
     toggleLayerOpacity,
     toggleShaderOpacity,
   } from '../utils/layerOpacity';
+  import { findContentTreeItem } from '../composables/useLocateInContentTree';
 
-  const props = defineProps<{
-    item: VcsTreeNodeItem;
+  const props = withDefaults(
+    defineProps<{
+      item: VcsTreeNodeItem;
+      showSplit?: boolean;
+      splitActive?: boolean;
+    }>(),
+    {
+      showSplit: false,
+      splitActive: false,
+    },
+  );
+
+  const emit = defineEmits<{
+    splitToggled: [];
+    locate: [];
   }>();
 
   const app = inject<VcsUiApp>('vcsApp')!;
+  const fontSize = useFontSize();
+  const iconSize = computed(() => fontSize.value * (1.2 + 0.1 / 3));
   const layer = computed(() => app.layers.getByKey(props.item.name));
+  const locatable = computed(
+    () =>
+      app.uiConfig.config.hideContentTree !== true &&
+      !!findContentTreeItem(app, props.item.name),
+  );
+
   const opacityLayer = computed(() => {
     const activeLayer = layer.value;
     return activeLayer && isOpacityLayer(activeLayer) ? activeLayer : null;
@@ -86,10 +108,18 @@
       opacity.value = getShaderOpacity(shaderLayer.value);
     }
   }
+
+  function onSplitToggle(): void {
+    emit('splitToggled');
+  }
+
+  function onLocate(): void {
+    emit('locate');
+  }
 </script>
 
 <template>
-  <div class="flex flex-col items-center gap-2 px-3 py-1 mr-2">
+  <div class="flex flex-col items-center gap-2 px-3 py-1">
     <VAlert
       v-if="shaderBlocked"
       type="info"
@@ -103,8 +133,8 @@
         )
       }}
     </VAlert>
-    <template v-if="opacityLayer || shaderLayer">
-      <div class="opacity-row">
+    <div class="opacity-row">
+      <template v-if="opacityLayer || shaderLayer">
         <VBtn
           :icon="isHidden ? 'mdi-eye-off' : 'mdi-eye'"
           :title="
@@ -127,9 +157,53 @@
           :disabled="shaderBlocked"
           @update:model-value="onOpacityChange"
         />
+      </template>
+      <div class="layer-actions ml-auto">
+        <VBtn
+          v-if="showSplit"
+          icon
+          class="split-toggle"
+          :color="splitActive ? 'primary' : undefined"
+          :title="
+            $t(
+              splitActive
+                ? 'lux3dviewerPluginLayerManager.components.layerSwap.splitViewActiveButton'
+                : 'lux3dviewerPluginLayerManager.components.layerSwap.splitViewButton',
+            )
+          "
+          variant="text"
+          @click.stop="onSplitToggle"
+        >
+          <VIcon :size="iconSize">$vcsSplitView</VIcon>
+        </VBtn>
+        <span
+          :title="
+            $t(
+              locatable
+                ? 'lux3dviewerPluginLayerManager.components.layerSwap.locateButton'
+                : 'lux3dviewerPluginLayerManager.components.layerSwap.locateUnavailable',
+            )
+          "
+        >
+          <VBtn
+            icon
+            class="locate-toggle"
+            :disabled="!locatable"
+            variant="text"
+            @click.stop="onLocate"
+          >
+            <VIcon :size="iconSize">mdi-crosshairs-gps</VIcon>
+          </VBtn>
+        </span>
       </div>
-    </template>
-    <VAlert v-else type="info" variant="tonal" density="compact" class="w-100">
+    </div>
+    <VAlert
+      v-if="!opacityLayer && !shaderLayer"
+      type="info"
+      variant="tonal"
+      density="compact"
+      class="w-100"
+    >
       {{ $t(unsupportedMessageKey) }}
     </VAlert>
   </div>
@@ -139,10 +213,17 @@
   .opacity-row {
     display: flex;
     align-items: center;
+    width: 100%;
     gap: 1rem;
   }
 
   .opaycity-slider {
     max-width: 100px;
+  }
+
+  .layer-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
   }
 </style>

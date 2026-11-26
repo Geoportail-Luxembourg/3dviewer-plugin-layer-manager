@@ -11,6 +11,8 @@ change opacity, and open layer metadata.
 - **Removing layers**: remove a layer directly from the list.
 - **Opacity changes**: adjust a layer's opacity or hide it completely.
 - **Link to metadata**: open the layer's metadata page from the list.
+- **Split view**: the topmost layer can be split into two views, allowing for comparison with the layers below.
+- **Locate layer**: jump to the layer in the content tree, expanding its parents and briefly highlighting the entry.
 
 ## Development
 

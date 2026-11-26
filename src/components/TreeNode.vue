@@ -24,6 +24,8 @@
       expandedName?: string | null;
       opened: string[];
       openOnClick?: boolean;
+      splitLayerName?: string | null;
+      splitActive?: boolean;
     }>(),
     {
       itemChildren: 'children',
@@ -31,6 +33,8 @@
       level: 0,
       expandedName: undefined,
       openOnClick: false,
+      splitLayerName: undefined,
+      splitActive: false,
     },
   );
 
@@ -39,6 +43,8 @@
     click: [item: VcsTreeNodeItem, event: MouseEvent];
     itemMoved: [event: ItemMovedEvent];
     optionsToggled: [name: string];
+    splitToggled: [name: string];
+    locate: [name: string];
   }>();
 
   const fontSize = useFontSize();
@@ -60,6 +66,13 @@
 
   const isGroup = computed(
     () => children.value.length > 0 || props.item.forceNodeDisplay,
+  );
+
+  const showSplitToggle = computed(
+    () =>
+      props.level === 0 &&
+      props.splitLayerName !== undefined &&
+      props.item.name === props.splitLayerName,
   );
 
   function toggleCurrentItem(): void {
@@ -108,6 +121,14 @@
 
   function handleOptionsToggle(): void {
     emit('optionsToggled', props.item.name);
+  }
+
+  function handleSplitToggle(): void {
+    emit('splitToggled', props.item.name);
+  }
+
+  function handleLocate(): void {
+    emit('locate', props.item.name);
   }
 
   function bubbleOptionsToggled(name: string): void {
@@ -204,7 +225,14 @@
       </slot>
     </v-row>
     <slot name="options" v-bind="{ item }">
-      <LayerOptions v-if="expandedName === item.name" :item="item" />
+      <LayerOptions
+        v-if="expandedName === item.name"
+        :item="item"
+        :show-split="showSplitToggle"
+        :split-active="splitActive"
+        @split-toggled="handleSplitToggle"
+        @locate="handleLocate"
+      />
     </slot>
     <v-expand-transition>
       <SortableList

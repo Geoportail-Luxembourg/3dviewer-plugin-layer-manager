@@ -1,6 +1,7 @@
 import type { VcsPlugin, VcsUiApp, PluginConfigEditor } from '@vcmap/ui';
 import { name, version, mapVersion } from '../package.json';
 import { main } from './layer-manager';
+import './styles/contentTreeHighlight.scss';
 
 type PluginConfig = object;
 type PluginState = object;
@@ -32,10 +33,15 @@ export default function plugin(): LayerManagerPlugin {
               opacity: 'Opacity',
               dragHandle: 'Drag to reorder',
               optionsButton: 'Layer options',
+              splitViewButton: 'Show split view',
+              splitViewActiveButton: 'Hide split view',
+              locateButton: 'Show in layer tree',
+              locateUnavailable:
+                'This layer is not available in the layer tree.',
               customShaderBlocked:
                 'This layer already has a custom shader. Its opacity cannot be changed here.',
               opacityUnsupportedTerrain:
-                'Terrain layers do not support opacity.',
+                'Terrain layers do not support opacity or split view.',
               opacityUnsupported:
                 'Opacity is not supported for this layer type.',
             },
@@ -55,10 +61,15 @@ export default function plugin(): LayerManagerPlugin {
               opacity: 'Deckkraft',
               dragHandle: 'Zum Verschieben ziehen',
               optionsButton: 'Ebenenoptionen',
+              splitViewButton: 'Geteilte Ansicht anzeigen',
+              splitViewActiveButton: 'Geteilte Ansicht ausblenden',
+              locateButton: 'Im Ebenenbaum anzeigen',
+              locateUnavailable:
+                'Diese Ebene ist im Ebenenbaum nicht verfügbar.',
               customShaderBlocked:
                 'Diese Ebene verwendet bereits einen eigenen Shader. Die Deckkraft kann hier nicht geändert werden.',
               opacityUnsupportedTerrain:
-                'Terrainebenen unterstützen keine Deckkraft.',
+                'Terrainebenen unterstützen weder Deckkraft noch geteilte Ansicht.',
               opacityUnsupported:
                 'Deckkraft wird für diesen Ebenentyp nicht unterstützt.',
             },
@@ -78,10 +89,15 @@ export default function plugin(): LayerManagerPlugin {
               opacity: 'Opacité',
               dragHandle: 'Glisser pour réorganiser',
               optionsButton: 'Options de la couche',
+              splitViewButton: 'Afficher la vue partagée',
+              splitViewActiveButton: 'Masquer la vue partagée',
+              locateButton: 'Afficher dans l’arborescence des couches',
+              locateUnavailable:
+                'Cette couche n’est pas disponible dans l’arborescence des couches.',
               customShaderBlocked:
                 'Cette couche utilise déjà un shader personnalisé. Son opacité ne peut pas être modifiée ici.',
               opacityUnsupportedTerrain:
-                'Les couches de terrain ne prennent pas en charge l’opacité.',
+                'Les couches de terrain ne prennent pas en charge l’opacité ni la vue partagée.',
               opacityUnsupported:
                 'L’opacité n’est pas prise en charge pour ce type de couche.',
             },
@@ -101,10 +117,15 @@ export default function plugin(): LayerManagerPlugin {
               opacity: 'Opazitéit',
               dragHandle: 'Zéien, fir d’Reiefolleg z’änneren',
               optionsButton: 'Schichtoptiounen',
+              splitViewButton: 'Geteilte Vue weisen',
+              splitViewActiveButton: 'Geteilte Vue verstoppen',
+              locateButton: 'An der Schichtestruktur weisen',
+              locateUnavailable:
+                'Dës Schicht ass an der Schichtestruktur net disponibel.',
               customShaderBlocked:
                 'Dës Schicht huet schonn ee personaliséierte Shader. D’Opazitéit kann hei net geännert ginn.',
               opacityUnsupportedTerrain:
-                'Terrain-Schichte ginn net mat Opazitéit ënnerstëtzt.',
+                'Terrain-Schichte ginn net mat Opazitéit oder geteilter Vue ënnerstëtzt.',
               opacityUnsupported:
                 'D’Opazitéit gëtt fir dësen Typ vu Schicht net ënnerstëtzt.',
             },

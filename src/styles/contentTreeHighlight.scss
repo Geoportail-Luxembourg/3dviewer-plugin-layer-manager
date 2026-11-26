@@ -1,0 +1,17 @@
+.lux-locate-highlight {
+  animation: lux-locate-flash 0.7s ease-in-out 2;
+}
+
+@keyframes lux-locate-flash {
+  0% {
+    background-color: rgba(var(--v-theme-primary), 0.65);
+  }
+
+  30% {
+    background-color: rgba(var(--v-theme-primary), 0.55);
+  }
+
+  100% {
+    background-color: transparent;
+  }
+}

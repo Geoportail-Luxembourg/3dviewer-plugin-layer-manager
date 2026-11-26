@@ -18,6 +18,8 @@
       openAll?: boolean;
       openOnClick?: boolean;
       expandedName?: string | null;
+      splitLayerName?: string | null;
+      splitActive?: boolean;
     }>(),
     {
       items: () => [],
@@ -26,6 +28,8 @@
       openAll: false,
       openOnClick: false,
       expandedName: undefined,
+      splitLayerName: undefined,
+      splitActive: false,
     },
   );
 
@@ -33,6 +37,8 @@
     itemMoved: [event: ItemMovedEvent];
     click: [item: VcsTreeNodeItem];
     optionsToggled: [name: string];
+    splitToggled: [name: string];
+    locate: [name: string];
   }>();
 
   const localOpenedItems = defineModel<string[]>('opened', {
@@ -89,6 +95,14 @@
     emit('optionsToggled', name);
   }
 
+  function handleSplitToggled(name: string): void {
+    emit('splitToggled', name);
+  }
+
+  function handleLocate(name: string): void {
+    emit('locate', name);
+  }
+
   function itemClicked(
     item: VcsTreeNodeItem | undefined,
     event: MouseEvent,
@@ -142,11 +156,15 @@
           :open-on-click="openOnClick"
           :item-children="itemChildren"
           :expanded-name="expandedName"
+          :split-layer-name="splitLayerName"
+          :split-active="splitActive"
           :draggable="draggable"
           @mousedown.shift="$event.preventDefault()"
           @item-toggled="itemToggled"
           @item-moved="handleNodeItemMoved"
           @options-toggled="handleOptionsToggled"
+          @split-toggled="handleSplitToggled"
+          @locate="handleLocate"
           @click="handleItemClick"
         >
           <template v-for="slot of forwardSlots" #[slot]="scope">
