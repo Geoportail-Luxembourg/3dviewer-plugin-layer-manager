@@ -1,6 +1,7 @@
 import type { VcsPlugin, VcsUiApp, PluginConfigEditor } from '@vcmap/ui';
 import { name, version, mapVersion } from '../package.json';
 import { main } from './layer-manager';
+import './styles/contentTreeHighlight.scss';
 
 type PluginConfig = object;
 type PluginState = object;
@@ -34,6 +35,9 @@ export default function plugin(): LayerManagerPlugin {
               optionsButton: 'Layer options',
               splitViewButton: 'Show split view',
               splitViewActiveButton: 'Hide split view',
+              locateButton: 'Show in layer tree',
+              locateUnavailable:
+                'This layer is not available in the layer tree.',
               customShaderBlocked:
                 'This layer already has a custom shader. Its opacity cannot be changed here.',
               opacityUnsupportedTerrain:
@@ -59,6 +63,9 @@ export default function plugin(): LayerManagerPlugin {
               optionsButton: 'Ebenenoptionen',
               splitViewButton: 'Geteilte Ansicht anzeigen',
               splitViewActiveButton: 'Geteilte Ansicht ausblenden',
+              locateButton: 'Im Ebenenbaum anzeigen',
+              locateUnavailable:
+                'Diese Ebene ist im Ebenenbaum nicht verfügbar.',
               customShaderBlocked:
                 'Diese Ebene verwendet bereits einen eigenen Shader. Die Deckkraft kann hier nicht geändert werden.',
               opacityUnsupportedTerrain:
@@ -84,6 +91,9 @@ export default function plugin(): LayerManagerPlugin {
               optionsButton: 'Options de la couche',
               splitViewButton: 'Afficher la vue partagée',
               splitViewActiveButton: 'Masquer la vue partagée',
+              locateButton: 'Afficher dans l’arborescence des couches',
+              locateUnavailable:
+                'Cette couche n’est pas disponible dans l’arborescence des couches.',
               customShaderBlocked:
                 'Cette couche utilise déjà un shader personnalisé. Son opacité ne peut pas être modifiée ici.',
               opacityUnsupportedTerrain:
@@ -109,6 +119,9 @@ export default function plugin(): LayerManagerPlugin {
               optionsButton: 'Schichtoptiounen',
               splitViewButton: 'Geteilte Vue weisen',
               splitViewActiveButton: 'Geteilte Vue verstoppen',
+              locateButton: 'An der Schichtestruktur weisen',
+              locateUnavailable:
+                'Dës Schicht ass an der Schichtestruktur net disponibel.',
               customShaderBlocked:
                 'Dës Schicht huet schonn ee personaliséierte Shader. D’Opazitéit kann hei net geännert ginn.',
               opacityUnsupportedTerrain:
