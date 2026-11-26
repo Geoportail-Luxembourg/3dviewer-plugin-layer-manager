@@ -38,6 +38,7 @@
     click: [item: VcsTreeNodeItem];
     optionsToggled: [name: string];
     splitToggled: [name: string];
+    locate: [name: string];
   }>();
 
   const localOpenedItems = defineModel<string[]>('opened', {
@@ -96,6 +97,10 @@
 
   function handleSplitToggled(name: string): void {
     emit('splitToggled', name);
+  }
+
+  function handleLocate(name: string): void {
+    emit('locate', name);
   }
 
   function itemClicked(
@@ -159,6 +164,7 @@
           @item-moved="handleNodeItemMoved"
           @options-toggled="handleOptionsToggled"
           @split-toggled="handleSplitToggled"
+          @locate="handleLocate"
           @click="handleItemClick"
         >
           <template v-for="slot of forwardSlots" #[slot]="scope">

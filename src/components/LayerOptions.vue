@@ -14,6 +14,7 @@
     toggleLayerOpacity,
     toggleShaderOpacity,
   } from '../utils/layerOpacity';
+  import { findContentTreeItem } from '../composables/useLocateInContentTree';
 
   const props = withDefaults(
     defineProps<{
@@ -29,12 +30,19 @@
 
   const emit = defineEmits<{
     splitToggled: [];
+    locate: [];
   }>();
 
   const app = inject<VcsUiApp>('vcsApp')!;
   const fontSize = useFontSize();
   const iconSize = computed(() => fontSize.value * (1.2 + 0.1 / 3));
   const layer = computed(() => app.layers.getByKey(props.item.name));
+  const locatable = computed(
+    () =>
+      app.uiConfig.config.hideContentTree !== true &&
+      !!findContentTreeItem(app, props.item.name),
+  );
+
   const opacityLayer = computed(() => {
     const activeLayer = layer.value;
     return activeLayer && isOpacityLayer(activeLayer) ? activeLayer : null;
@@ -104,6 +112,10 @@
   function onSplitToggle(): void {
     emit('splitToggled');
   }
+
+  function onLocate(): void {
+    emit('locate');
+  }
 </script>
 
 <template>
@@ -121,7 +133,7 @@
         )
       }}
     </VAlert>
-    <div v-if="opacityLayer || shaderLayer || showSplit" class="opacity-row">
+    <div class="opacity-row">
       <template v-if="opacityLayer || shaderLayer">
         <VBtn
           :icon="isHidden ? 'mdi-eye-off' : 'mdi-eye'"
@@ -146,23 +158,44 @@
           @update:model-value="onOpacityChange"
         />
       </template>
-      <VBtn
-        v-if="showSplit"
-        icon
-        class="split-toggle ml-auto"
-        :color="splitActive ? 'primary' : undefined"
-        :title="
-          $t(
-            splitActive
-              ? 'lux3dviewerPluginLayerManager.components.layerSwap.splitViewActiveButton'
-              : 'lux3dviewerPluginLayerManager.components.layerSwap.splitViewButton',
-          )
-        "
-        variant="text"
-        @click.stop="onSplitToggle"
-      >
-        <VIcon :size="iconSize">$vcsSplitView</VIcon>
-      </VBtn>
+      <div class="layer-actions ml-auto">
+        <VBtn
+          v-if="showSplit"
+          icon
+          class="split-toggle"
+          :color="splitActive ? 'primary' : undefined"
+          :title="
+            $t(
+              splitActive
+                ? 'lux3dviewerPluginLayerManager.components.layerSwap.splitViewActiveButton'
+                : 'lux3dviewerPluginLayerManager.components.layerSwap.splitViewButton',
+            )
+          "
+          variant="text"
+          @click.stop="onSplitToggle"
+        >
+          <VIcon :size="iconSize">$vcsSplitView</VIcon>
+        </VBtn>
+        <span
+          :title="
+            $t(
+              locatable
+                ? 'lux3dviewerPluginLayerManager.components.layerSwap.locateButton'
+                : 'lux3dviewerPluginLayerManager.components.layerSwap.locateUnavailable',
+            )
+          "
+        >
+          <VBtn
+            icon
+            class="locate-toggle"
+            :disabled="!locatable"
+            variant="text"
+            @click.stop="onLocate"
+          >
+            <VIcon :size="iconSize">mdi-crosshairs-gps</VIcon>
+          </VBtn>
+        </span>
+      </div>
     </div>
     <VAlert
       v-if="!opacityLayer && !shaderLayer"
@@ -186,5 +219,11 @@
 
   .opaycity-slider {
     max-width: 100px;
+  }
+
+  .layer-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
   }
 </style>

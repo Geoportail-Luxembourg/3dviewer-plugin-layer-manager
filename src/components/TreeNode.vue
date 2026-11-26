@@ -44,6 +44,7 @@
     itemMoved: [event: ItemMovedEvent];
     optionsToggled: [name: string];
     splitToggled: [name: string];
+    locate: [name: string];
   }>();
 
   const fontSize = useFontSize();
@@ -124,6 +125,10 @@
 
   function handleSplitToggle(): void {
     emit('splitToggled', props.item.name);
+  }
+
+  function handleLocate(): void {
+    emit('locate', props.item.name);
   }
 
   function bubbleOptionsToggled(name: string): void {
@@ -226,6 +231,7 @@
         :show-split="showSplitToggle"
         :split-active="splitActive"
         @split-toggled="handleSplitToggle"
+        @locate="handleLocate"
       />
     </slot>
     <v-expand-transition>

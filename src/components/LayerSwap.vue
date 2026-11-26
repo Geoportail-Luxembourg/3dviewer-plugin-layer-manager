@@ -6,6 +6,7 @@
   import { useLayerTreeItems } from '../composables/useLayerTreeItems';
   import { useLayerSwapDrag } from '../composables/useLayerSwapDrag';
   import { useLayerSplitView } from '../composables/useLayerSplitView';
+  import { useLocateInContentTree } from '../composables/useLocateInContentTree';
 
   defineOptions({ name: 'VcsLayerSwap' });
 
@@ -14,6 +15,7 @@
   const { move } = useLayerSwapDrag(refreshItems);
   const { activeLayerName, canSplit, toggle, updateActiveLayer, stop } =
     useLayerSplitView();
+  const locateInContentTree = useLocateInContentTree();
   const expandedName = ref<string | null>(null);
   const topLayerName = computed(() => items.value[0]?.name ?? null);
   const splitLayerName = computed(() =>
@@ -63,6 +65,7 @@
       @item-moved="move"
       @options-toggled="toggleOptionsByName"
       @split-toggled="toggle"
+      @locate="locateInContentTree"
       @click="toggleOptions"
     />
     <v-sheet v-else class="ma-2">
